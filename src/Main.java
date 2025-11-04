@@ -147,16 +147,45 @@ public class Main extends JPanel {
         double mutationRate= 0.1;
         Random rand = new Random();
         for(int i=0; i<= genome.length;i++)
-        if(rand.nextDouble() < mutationRate){
-            if (genome[i] == 'R'){
-                genome[i] = 'L';
+            if(rand.nextDouble() < mutationRate){
+                if (genome[i] == 'R'){
+                    double randomNum1 = Math.floor(Math.random() * 2) + 1;
+                    if(randomNum1 == 1){
+                        genome[i] = 'L';
+                    }
+                    else if(randomNum1 == 2){
+                        genome[i] = 'F';
+                    }
+                }
+                else if(genome[i]=='L'){
+                    double randomNum2 = Math.floor(Math.random() * 2) + 1;
+                    if(randomNum2 == 1){
+                        genome[i] = 'R';
+                    }
+                    else if(randomNum2 == 2){
+                        genome[i] = 'F';
+                    }
+                }
+                else if (genome[i]=='F' ){
+                    double randomNum3 = Math.floor(Math.random() * 2) + 1;
+                    if(randomNum3 == 1){
+                        genome[i] = 'L';
+                    }
+                    else if(randomNum3 == 2){
+                        genome[i] = 'R';
+                    }
+                }
             }
-            else if(genome[i]=='L'){
-                genome[i] = 'R';
-            }
-        }
         return genome;
     }
+    While(runner position == '5'){
+        for(int i=0; i<= genome.length;i++){
+            if(runner position == '1'){
+                break;
+            }
+        }
+    }
+
 
     // Create Spawning Children Loop Method
 /*
