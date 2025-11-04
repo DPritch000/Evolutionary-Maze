@@ -64,14 +64,7 @@ public class Main extends JPanel {
 
 
             pane.add(runner, Integer.valueOf(i));
-
-
-
-
-
-
-
-
+            
             System.out.println("Runner"+i+ "     Genome: "+ Arrays.toString(runner.genome)+ "     Color: " + runner.uniqueColor);
         }
         return runners;
@@ -177,7 +170,7 @@ public class Main extends JPanel {
                 }
             }
         return genome;
-    }
+  /*  }
     While(runner position == '5'){
         for(int i=0; i<= genome.length;i++){
             if(runner position == '1'){
@@ -188,7 +181,7 @@ public class Main extends JPanel {
 
 
     // Create Spawning Children Loop Method
-/*
+
     public int evaluateFitness(List<Point> path, char[][] map) {
         int fitness = 0;
         boolean reachedGoal = false;
@@ -219,8 +212,8 @@ public class Main extends JPanel {
         }
 
         return fitness;
-    }
-*/
+ */   }
+
  public void Start(Maze maze){
 
      char[][] positionMap = maze.getGrid();
