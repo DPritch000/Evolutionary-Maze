@@ -1,13 +1,12 @@
 import javax.swing.*;
 import java.awt.*;
-import java.lang.reflect.Array;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.ArrayList;
 import java.util.*;
 
 public class Main extends JPanel {
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
         //JFame and visuals will go
         JFrame frame = new JFrame("Maze Viewer");
@@ -16,18 +15,16 @@ public class Main extends JPanel {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         JLayeredPane layeredPane = new JLayeredPane();
-        layeredPane.setPreferredSize(new Dimension(1920,1080));
+        layeredPane.setPreferredSize(new Dimension(1920, 1080));
 
 
         Maze maze = new Maze();
         layeredPane.add(maze, Integer.valueOf(0));
-        ArrayList<Runner> gen1 = spawn(maze,frame, layeredPane, 100);
+        ArrayList<Runner> gen1 = spawn(maze, frame, layeredPane, 1);
         frame.add(layeredPane);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-
-
 
 
         //This section of code is for demo
@@ -44,32 +41,58 @@ public class Main extends JPanel {
         }
 */
         int tileSize = 34;
-        int x_pix= tileSize/2;
-        int y_pix = tileSize/2;
+        int x_pix = tileSize / 2;
+        int y_pix = tileSize / 2;
 
+        Timer movementTimer = new Timer();
+        movementTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                char[][] grid = maze.getGrid();
+                int tileSize = 34;
+                for (Runner r : gen1) {
+                    int tileX = r.getX() / tileSize;
+                    int tileY = r.getY() / tileSize;
+                    if (tileY >= 0 && tileY < grid.length && tileX >= 0 && tileX < grid[0].length) {
+                        char tile = grid[tileY][tileX]; // get the character at this position
+                        if (tile == '5') {
+                            if (!r.isPausedForGenome()) {
+                                r.pauseForGenome();  //  pause generic movement
+                                r.moveByGenome(grid); //  activate genome once
+                            }
+                        } else {
+                            r.setX(r.getX() + 17); //  generic movement
+                        }
+                    }
+                }
+            }
+        }, 0, 1000);
     }
+
     public static ArrayList<Runner> spawn(Maze maze, JFrame frame, JLayeredPane pane, int spawnCount) {  //spawns runners
         ArrayList<Runner> runners = new ArrayList<>();
-        for(int i=1; i<=spawnCount; i++){
+        for (int i = 1; i <= spawnCount; i++) {
             Runner runner = new Runner();
             runners.add(runner);
 
 
             int tileSize = 34;
-            int x_pix= tileSize/2;
-            int y_pix =  17 + (int)((Math.random()*(20))-10);
+            int x_pix = tileSize / 2;
+            int y_pix = 17 + (int) ((Math.random() * (20)) - 10);
 
             runner.setX(x_pix);
             runner.setY(y_pix);
 
 
             pane.add(runner, Integer.valueOf(i));
-            
-            System.out.println("Runner"+i+ "     Genome: "+ Arrays.toString(runner.genome)+ "     Color: " + runner.uniqueColor);
+
+            System.out.println("Runner" + i + "     Genome: " + Arrays.toString(runner.genome) + "     Color: " + runner.uniqueColor);
         }
         return runners;
+
     }
-    public static ArrayList<Runner> reproduction(ArrayList<Runner> parents, int spawnCount){
+
+    public static ArrayList<Runner> reproduction(ArrayList<Runner> parents, int spawnCount) {
         Random rand1 = new Random();
         int randomNumber1 = rand1.nextInt(spawnCount); //MAKE THIS WEIGHTED BASED ON FITNESS LATER
         Random rand2 = new Random();
@@ -80,10 +103,10 @@ public class Main extends JPanel {
         int length = parent1.genome.length;
         int crossoverPoint = rand1.nextInt(length);
 
-         Runner child1 = null;
-         Runner child2 = null;
+        Runner child1 = null;
+        Runner child2 = null;
 
-         //For Child1
+        //For Child1
 // First half from parent1
         for (int i = 0; i < crossoverPoint; i++) {
             child1.genome[i] = parent1.genome[i];
@@ -99,16 +122,15 @@ public class Main extends JPanel {
         //Chosing Color
         Random rand3 = new Random();
         boolean trueOrFalse = rand3.nextBoolean();
-        if( trueOrFalse== true){
-            child1.uniqueColor=parent1.uniqueColor;
-        }
-        else if(trueOrFalse == false ){
-            child1.uniqueColor=parent2.uniqueColor;
+        if (trueOrFalse == true) {
+            child1.uniqueColor = parent1.uniqueColor;
+        } else if (trueOrFalse == false) {
+            child1.uniqueColor = parent2.uniqueColor;
         }
 
         //For Child 2
 
-        for (int i = 0; i < crossoverPoint; i++){
+        for (int i = 0; i < crossoverPoint; i++) {
             child2.genome[i] = parent2.genome[i];
         }
 
@@ -117,18 +139,17 @@ public class Main extends JPanel {
         }
         mutate(child2.genome);
 
-        parents.set(randomNumber1,child1);
-        parents.set(randomNumber2,child2);
+        parents.set(randomNumber1, child1);
+        parents.set(randomNumber2, child2);
 
         //Choosing Color
 
         Random rand4 = new Random();
         boolean trueOrFalse2 = rand4.nextBoolean();
-        if( trueOrFalse2== true){
-            child2.uniqueColor=parent1.uniqueColor;
-        }
-        else if(trueOrFalse2 == false ){
-           child2.uniqueColor=parent2.uniqueColor;
+        if (trueOrFalse2 == true) {
+            child2.uniqueColor = parent1.uniqueColor;
+        } else if (trueOrFalse2 == false) {
+            child2.uniqueColor = parent2.uniqueColor;
         }
 
         return parents;
@@ -136,35 +157,30 @@ public class Main extends JPanel {
 
     }
 
-    public static char[] mutate(char[] genome){  // adds chance of mutation to genome
-        double mutationRate= 0.1;
+    public static char[] mutate(char[] genome) {  // adds chance of mutation to genome
+        double mutationRate = 0.1;
         Random rand = new Random();
-        for(int i=0; i<= genome.length;i++)
-            if(rand.nextDouble() < mutationRate){
-                if (genome[i] == 'R'){
+        for (int i = 0; i <= genome.length; i++)
+            if (rand.nextDouble() < mutationRate) {
+                if (genome[i] == 'R') {
                     double randomNum1 = Math.floor(Math.random() * 2) + 1;
-                    if(randomNum1 == 1){
+                    if (randomNum1 == 1) {
                         genome[i] = 'L';
-                    }
-                    else if(randomNum1 == 2){
+                    } else if (randomNum1 == 2) {
                         genome[i] = 'F';
                     }
-                }
-                else if(genome[i]=='L'){
+                } else if (genome[i] == 'L') {
                     double randomNum2 = Math.floor(Math.random() * 2) + 1;
-                    if(randomNum2 == 1){
+                    if (randomNum2 == 1) {
                         genome[i] = 'R';
-                    }
-                    else if(randomNum2 == 2){
+                    } else if (randomNum2 == 2) {
                         genome[i] = 'F';
                     }
-                }
-                else if (genome[i]=='F' ){
+                } else if (genome[i] == 'F') {
                     double randomNum3 = Math.floor(Math.random() * 2) + 1;
-                    if(randomNum3 == 1){
+                    if (randomNum3 == 1) {
                         genome[i] = 'L';
-                    }
-                    else if(randomNum3 == 2){
+                    } else if (randomNum3 == 2) {
                         genome[i] = 'R';
                     }
                 }
@@ -212,37 +228,36 @@ public class Main extends JPanel {
         }
 
         return fitness;
- */   }
+ */
+    }
 
- public void Start(Maze maze){
+    public void Start(Maze maze) {
 
-     char[][] positionMap = maze.getGrid();
-     //Testing for time
-     int tileSize = 34;
-     int x_pix= tileSize/2;
-     int y_pix = tileSize/2;
+        char[][] positionMap = maze.getGrid();
+        //Testing for time
+        int tileSize = 34;
+        int x_pix = tileSize / 2;
+        int y_pix = tileSize / 2;
 
-     int gridPositionValue = (int) positionMap[0][0];
-
-
-     // Make something update x_pos and y_pos
+        int gridPositionValue = (int) positionMap[0][0];
 
 
-     Timer timer = new Timer();
-     TimerTask task = new TimerTask() {
-         @Override
-         public void run() {
-
-         }
-     };
-     timer.schedule(task,10);    //timer.schedule needs a task and a time in milliseconds
-
- }
- public void update(char[] genome){
+        // Make something update x_pos and y_pos
 
 
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
 
- }
+            }
+        };
+        timer.schedule(task, 10);    //timer.schedule needs a task and a time in milliseconds
+
+    }
+
+    public void update(char[] genome) {
 
 
+    }
 }

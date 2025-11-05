@@ -52,7 +52,7 @@ public class Maze extends JPanel{
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-         int tileSize = 34;
+        int tileSize = 34;
         String[] rows = tileMap.split("\n");// splits the string into rows
 
 
