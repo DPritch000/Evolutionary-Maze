@@ -28,7 +28,7 @@ public class Main extends JPanel {
 
 
         //This section of code is for demo
-        System.out.println(Runner.createGenome(10));
+        //System.out.println(Runner.createGenome(10));
 
 /*
         ArrayList<Evolution> gen2 = spawn(100);
@@ -44,7 +44,9 @@ public class Main extends JPanel {
         int x_pix = tileSize / 2;
         int y_pix = tileSize / 2;
 
-        Timer movementTimer = new Timer();
+        //temp comment out
+
+  /*      Timer movementTimer = new Timer();
         movementTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -66,7 +68,7 @@ public class Main extends JPanel {
                     }
                 }
             }
-        }, 0, 1000);
+        }, 0, 1000);*/
     }
 
     public static ArrayList<Runner> spawn(Maze maze, JFrame frame, JLayeredPane pane, int spawnCount) {  //spawns runners
@@ -239,25 +241,29 @@ public class Main extends JPanel {
         int x_pix = tileSize / 2;
         int y_pix = tileSize / 2;
 
-        int gridPositionValue = (int) positionMap[0][0];
+        char gridPositionValue = positionMap[0][0];
 
 
         // Make something update x_pos and y_pos
 
 
         Timer timer = new Timer();
-        TimerTask task = new TimerTask() {
+        TimerTask draw = new TimerTask() {
             @Override
             public void run() {
 
             }
         };
-        timer.schedule(task, 10);    //timer.schedule needs a task and a time in milliseconds
+        timer.schedule(draw, 16);    //timer.schedule needs a task and a time in milliseconds
 
     }
 
-    public void update(char[] genome) {
+   public void draw(ArrayList<Runner> runners){
+        for(int i=0; i< runners.size(); i++){
+            char[] genome = runners.get(i).getGenome();
+            int j= 1;
 
 
-    }
+        }
+   }
 }

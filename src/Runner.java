@@ -16,6 +16,10 @@ public class Runner extends JPanel {
 
     public int x_pos;
     public int y_pos;
+    Maze maze = new Maze();
+    char[][] positionMap = maze.getGrid();
+    char gridPositionValue = positionMap[0][0];
+    String velocity = "postiveX";
 
     public static Color colorGenerate() {
         Random random = new Random();
@@ -49,16 +53,97 @@ public class Runner extends JPanel {
     }
 
     // Updated setters with repaint
-    public void setX(int x) {
-        this.x_pos = x;
+    public void movePositiveX() {
+        String velocity = "positiveX";
+        x_pos += 17;
         repaint();
     }
 
-    public void setY(int y) {
-        this.y_pos = y;
+    public void movePositiveY() {
+        String velocity = "positiveY";
+        y_pos += 17;
         repaint();
     }
 
+    public void moveNegativeX(){
+        String velocity = "negativeX";
+        x_pos -= 17;
+        repaint();
+    }
+    public void moveNegativeY(){
+        String velocity = "negativeY";
+        y_pos -= 17;
+        repaint();
+    }
+
+    public char getGridPositionValue(int x_pos, int y_pos){
+        int x = (int) Math.ceil(x_pos/34);
+        int y = (int) Math.ceil(y_pos/34);
+        gridPositionValue= positionMap[x][y];
+
+        return gridPositionValue;
+    }
+
+    public void makeDecision(char gene){
+        if (velocity == "positiveX"){
+                if(gene == 'R' ){
+                    moveNegativeY();
+                }
+                else if(gene == 'L'){
+                    movePositiveY();
+                }
+                else if(gene == 'F'){
+                    movePositiveX();
+                }
+        }
+        else if(velocity == "positiveY"){
+            if(gene == 'R' ){
+                movePositiveX();
+            }
+            else if(gene == 'L'){
+                moveNegativeY();
+            }
+            else if(gene == 'F'){
+                movePositiveY();
+            }
+        }
+        else if(velocity == "negativeX"){
+            if(gene == 'R' ){
+                movePositiveY();
+            }
+            else if(gene == 'L'){
+                moveNegativeY();
+            }
+            else if(gene == 'F'){
+                moveNegativeX();
+            }
+        }
+        else if (velocity == "negativeY"){
+            if(gene == 'R' ){
+                moveNegativeX();
+            }
+            else if(gene == 'L'){
+                movePositiveX();
+            }
+            else if(gene == 'F'){
+                moveNegativeY();
+            }
+        }
+    }
+
+
+
+
+public  char[] getGenome(){
+        return genome;
+}
+
+
+
+
+
+
+    /*
     // Updated getters to match custom position
     @Override
     public int getX() {
@@ -70,13 +155,14 @@ public class Runner extends JPanel {
         return y_pos;
     }
 
+
     private boolean pausedForGenome = false;
 
     private char direction = 'R'; // R = right, L = left, U = up, D = down
 
     private int genomeIndex = 0;
 
-    public void moveByGenome(char[][] mazeGrid) {
+   public void moveByGenome(char[][] mazeGrid) {
         if (genomeIndex >= genome.length) return;
 
         char gene = genome[genomeIndex];
@@ -110,5 +196,5 @@ public class Runner extends JPanel {
     public void pauseForGenome() {
         pausedForGenome = true;
     }
-
+*/
 }
