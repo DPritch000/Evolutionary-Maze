@@ -21,6 +21,8 @@ public class Main extends JPanel {
         Maze maze = new Maze();
         layeredPane.add(maze, Integer.valueOf(0));
         ArrayList<Runner> gen1 = spawn(maze, frame, layeredPane, 1);
+        Mazetimer mazetimer = new Mazetimer();
+        mazetimer.start(gen1);
         frame.add(layeredPane);
         frame.pack();
         frame.setLocationRelativeTo(null);
@@ -87,6 +89,8 @@ public class Main extends JPanel {
 
 
             pane.add(runner, Integer.valueOf(i));
+
+            runner.movePositiveX();
 
             System.out.println("Runner" + i + "     Genome: " + Arrays.toString(runner.genome) + "     Color: " + runner.uniqueColor);
         }
@@ -233,37 +237,6 @@ public class Main extends JPanel {
  */
     }
 
-    public void Start(Maze maze) {
 
-        char[][] positionMap = maze.getGrid();
-        //Testing for time
-        int tileSize = 34;
-        int x_pix = tileSize / 2;
-        int y_pix = tileSize / 2;
-
-        char gridPositionValue = positionMap[0][0];
-
-
-        // Make something update x_pos and y_pos
-
-
-        Timer timer = new Timer();
-        TimerTask draw = new TimerTask() {
-            @Override
-            public void run() {
-
-            }
-        };
-        timer.schedule(draw, 16);    //timer.schedule needs a task and a time in milliseconds
-
-    }
-
-   public void draw(ArrayList<Runner> runners){
-        for(int i=0; i< runners.size(); i++){
-            char[] genome = runners.get(i).getGenome();
-            int j= 1;
-
-
-        }
    }
-}
+

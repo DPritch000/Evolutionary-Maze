@@ -1,5 +1,8 @@
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.*;
 
 public class Runner extends JPanel {
@@ -19,7 +22,11 @@ public class Runner extends JPanel {
     Maze maze = new Maze();
     char[][] positionMap = maze.getGrid();
     char gridPositionValue = positionMap[0][0];
-    String velocity = "postiveX";
+    String velocity = "positiveX";
+    public int genomeIndexPosition = 0;
+
+    int seeNextGridPosX = 34;
+    int seeNextGridPosY = 34;
 
     public static Color colorGenerate() {
         Random random = new Random();
@@ -49,93 +56,131 @@ public class Runner extends JPanel {
         super.paintComponent(g);
         int tileSize = 34;
         g.setColor(uniqueColor);
-        g.fillRect(x_pos, y_pos, tileSize / 2, tileSize / 4);
+        g.fillRect(0, 0, tileSize / 4, tileSize / 4);
     }
 
     // Updated setters with repaint
     public void movePositiveX() {
-        String velocity = "positiveX";
+         velocity = "positiveX";
         x_pos += 17;
+        seeNextGridPosX = 34;
+        setBounds(x_pos,y_pos,34/4,34/4);
+
         repaint();
     }
 
     public void movePositiveY() {
-        String velocity = "positiveY";
+         velocity = "positiveY";
         y_pos += 17;
+        seeNextGridPosY = 34;
+        setBounds(x_pos,y_pos,34/4,34/4);
         repaint();
     }
 
-    public void moveNegativeX(){
-        String velocity = "negativeX";
+    public void moveNegativeX() {
+         velocity = "negativeX";
         x_pos -= 17;
-        repaint();
-    }
-    public void moveNegativeY(){
-        String velocity = "negativeY";
-        y_pos -= 17;
+        seeNextGridPosX = -34;
+        setBounds(x_pos,y_pos,34/4,34/4);
         repaint();
     }
 
-    public char getGridPositionValue(int x_pos, int y_pos){
-        int x = (int) Math.ceil(x_pos/34);
-        int y = (int) Math.ceil(y_pos/34);
-        gridPositionValue= positionMap[x][y];
+    public void moveNegativeY() {
+         velocity = "negativeY";
+        y_pos -= 17;
+        seeNextGridPosY = -34;
+        setBounds(x_pos,y_pos,34/4,34/4);
+        repaint();
+    }
+
+    public char getGridPositionValue(int x_pos, int y_pos) {
+        int x = (int) Math.ceil(x_pos / 34);
+        int y = (int) Math.ceil(y_pos / 34);
+        gridPositionValue = positionMap[x][y];
 
         return gridPositionValue;
     }
 
-    public void makeDecision(char gene){
-        if (velocity == "positiveX"){
-                if(gene == 'R' ){
-                    moveNegativeY();
-                }
-                else if(gene == 'L'){
-                    movePositiveY();
-                }
-                else if(gene == 'F'){
-                    movePositiveX();
-                }
-        }
-        else if(velocity == "positiveY"){
-            if(gene == 'R' ){
-                movePositiveX();
-            }
-            else if(gene == 'L'){
+    public void makeDecision(char gene) {
+        if (velocity == "positiveX") {
+            if (gene == 'R') {
                 moveNegativeY();
-            }
-            else if(gene == 'F'){
+                seeNextGridPosX = 0;
+            } else if (gene == 'L') {
                 movePositiveY();
-            }
-        }
-        else if(velocity == "negativeX"){
-            if(gene == 'R' ){
-                movePositiveY();
-            }
-            else if(gene == 'L'){
-                moveNegativeY();
-            }
-            else if(gene == 'F'){
-                moveNegativeX();
-            }
-        }
-        else if (velocity == "negativeY"){
-            if(gene == 'R' ){
-                moveNegativeX();
-            }
-            else if(gene == 'L'){
+                seeNextGridPosX = 0;
+            } else if (gene == 'F') {
                 movePositiveX();
+                seeNextGridPosY = 0;
             }
-            else if(gene == 'F'){
+
+        } else if (velocity == "positiveY") {
+            if (gene == 'R') {
+                movePositiveX();
+                seeNextGridPosY = 0;
+            } else if (gene == 'L') {
                 moveNegativeY();
+                seeNextGridPosX = 0;
+            } else if (gene == 'F') {
+                movePositiveY();
+                seeNextGridPosX = 0;
+            }
+        } else if (velocity == "negativeX") {
+            if (gene == 'R') {
+                movePositiveY();
+                seeNextGridPosX = 0;
+            } else if (gene == 'L') {
+                moveNegativeY();
+                seeNextGridPosX = 0;
+            } else if (gene == 'F') {
+                moveNegativeX();
+                seeNextGridPosY = 0;
+            }
+        } else if (velocity == "negativeY") {
+            if (gene == 'R') {
+                moveNegativeX();
+                seeNextGridPosY = 0;
+            } else if (gene == 'L') {
+                movePositiveX();
+                seeNextGridPosY = 0;
+            } else if (gene == 'F') {
+                moveNegativeY();
+                seeNextGridPosX = 0;
             }
         }
     }
 
+    public void setX(int x) {
+        x_pos = x;
+    }
 
+    public void setY(int y) {
+        y_pos = y;
+    }
 
+    public int getX_pos() {
+        return x_pos;
+    }
 
-public  char[] getGenome(){
+    public int getY_pos() {
+        return y_pos;
+    }
+
+    public char[] getGenome() {
         return genome;
+    }
+
+    public int getGenomeIndex() {
+        return genomeIndexPosition;
+    }
+
+    public void setGenomePosition(int i) {
+         genomeIndexPosition = i;
+    }
+
+    public String getVelocity() {
+        return velocity;
+    }
 }
 
 
@@ -197,4 +242,3 @@ public  char[] getGenome(){
         pausedForGenome = true;
     }
 */
-}
