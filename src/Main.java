@@ -15,19 +15,28 @@ public class Main extends JPanel {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         JLayeredPane layeredPane = new JLayeredPane();
+        frame.add(layeredPane);
         layeredPane.setPreferredSize(new Dimension(1920, 1080));
 
-
+        int spawnCount = 100;
         Maze maze = new Maze();
         layeredPane.add(maze, Integer.valueOf(0));
-        ArrayList<Runner> gen1 = spawn(maze, frame, layeredPane, 1);
+        ArrayList<Runner> gen1 = spawn(maze, frame, layeredPane, spawnCount);
         Mazetimer mazetimer = new Mazetimer();
-        mazetimer.start(gen1);
-        frame.add(layeredPane);
+        mazetimer.start(gen1,spawnCount,layeredPane);
+
+
+
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
+        for (int i = 0; i < maze.getGrid().length; i++) {
+            for (int j = 0; j < maze.getGrid()[i].length; j++) {
+                System.out.print(maze.getGrid()[i][j] + " ");
+            }
+            System.out.println(); // new line after each row
+        }
 
         //This section of code is for demo
         //System.out.println(Runner.createGenome(10));
@@ -90,7 +99,7 @@ public class Main extends JPanel {
 
             pane.add(runner, Integer.valueOf(i));
 
-            runner.movePositiveX();
+
 
             System.out.println("Runner" + i + "     Genome: " + Arrays.toString(runner.genome) + "     Color: " + runner.uniqueColor);
         }
@@ -159,7 +168,7 @@ public class Main extends JPanel {
         }
 
         return parents;
-
+  
 
     }
 
@@ -235,8 +244,69 @@ public class Main extends JPanel {
 
         return fitness;
  */
+   /* }
+    private Timer timer;
+    int geneIndex = 0;
+
+    public void start(ArrayList<Runner> runners, int spawncount, JLayeredPane layeredPane ) {
+        timer = new Timer();
+
+        TimerTask updateTask = new TimerTask() {
+            @Override
+            public void run() {
+                for (int i = 0; i < spawncount; i++) {
+                    int x = runners.get(i).getX_pos();
+                    int y = runners.get(i).getY_pos();
+                    //char gridPosition = runners.get(i).getGridPositionValue(x, y);
+
+                    char[] genome = runners.get(i).getGenome();
+
+                    while (runners.get(i).getGridPositionValue(x+runners.get(i).seeNextGridPosX,y+runners.get(i).seeNextGridPosY) == '1') {
+                        if (runners.get(i).getVelocity() == "positiveX") {
+                            runners.get(i).movePositiveX(layeredPane);
+
+                            if (runners.get(i).getVelocity() == "positiveY") {
+                                runners.get(i).movePositiveY(layeredPane);
+                            }
+                            if (runners.get(i).getVelocity() == "negativeX") {
+                                runners.get(i).moveNegativeX(layeredPane);
+                            }
+                            if (runners.get(i).getVelocity() == "negativeY") {
+                                runners.get(i).moveNegativeY(layeredPane);
+                            }
+                        }
+                    }
+                    if (runners.get(i).getGridPositionValue(x, y) == '5') {
+                        char gene = genome[geneIndex];
+                        runners.get(i).makeDecision(gene,layeredPane);
+                        while(runners.get(i).getGridPositionValue(x+runners.get(i).seeNextGridPosX,y+runners.get(i).seeNextGridPosY) == '0'){
+                            geneIndex+=1;
+                            gene = genome[geneIndex];
+                            runners.get(i).makeDecision(gene,layeredPane);
+
+                        }
+
+                    }
+                    geneIndex += 1;
+                    runners.get(i).setGenomePosition(geneIndex);
+
+                    // Ensure visual update
+                }
+
+            }
+
+
+        };
+        timer.scheduleAtFixedRate(updateTask, 0, 16); // ~60 FPS
     }
 
+    public void stop() {
+        if (timer != null) {
+            timer.cancel();
+        }
+    } */
+}
+}
 
-   }
+
 

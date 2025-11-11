@@ -1,89 +1,53 @@
-import java.util.Timer;
-import java.util.TimerTask;
+import javax.swing.*;
 import java.util.ArrayList;
 
 public class Mazetimer {
-    private Timer timer;
-    int geneIndex = 0;
+    private javax.swing.Timer timer;
 
-    public void start(ArrayList<Runner> runners) {
-        timer = new Timer();
+    public void start(ArrayList<Runner> runners, int spawnCount, JLayeredPane layeredPane) {
+        int delay = 100; // one frame every 100 ms (~10 FPS)
 
-        TimerTask updateTask = new TimerTask() {
-            @Override
-            public void run() {
-                for (Runner runner : runners) {
-                    int x = runner.getX_pos();
-                    int y = runner.getY_pos();
-                    char gridPosition = runner.getGridPositionValue(x, y);
+        timer = new javax.swing.Timer(delay, e -> {
+            for (Runner r : runners) {
 
-                    char[] genome = runner.getGenome();
+                int x = r.getX_pos();
+                int y = r.getY_pos();
+                char currentTile = r.getGridPositionValue(x, y);
 
-                    while (runners.trimToSize((runners.getX()) + (runners.seeNextGridPosX), (runners.getY())) + (runners.seeNextGridPosY) == '1') {
-            if (runners.getVelocity() == "positiveX") {
-                runners.movePositiveX();
-
-            if (runners.getVelocity() == "positiveY") {
-                runners.movePositiveY();
-            }
-            if (runners.getVelocity() == "negativeX") {
-                runners.moveNegativeX();
-            }
-            if (runners.getVelocity() == "negativeY") {
-                runners.moveNegativeY();
-            }
-        }
-                        }
-                    } while (gridPosition == '5') {
-                        char gene = genome[geneIndex];
-                        runner.makeDecision(gene);
-                        runner.setGenomePosition(geneIndex + 1);
+                // 1️⃣ If we hit a decision tile and not frozen, freeze and start thinking
+                if (r.getGridPositionValue(r.getX_pos(), r.getY_pos()) == '5') {
+                    if (!r.isFrozen()) {
+                        r.setFrozen(true);
+                        r.setDeciding(true);
                     }
-                    geneIndex+=1;
-
-                     // Ensure visual update
                 }
+
+                if (r.isFrozen() && r.isDeciding()) {
+                    char[] genome = r.getGenome();
+                    int idx = r.getGenomePosition();
+
+                    if (idx < genome.length) {
+                        char gene = genome[idx];
+                        boolean valid = r.makeDecision(gene, layeredPane);
+                        if (!valid) {
+                            r.setGenomePosition(idx + 1); // try next gene next frame
+                        } else {
+                            r.setGenomePosition(idx + 1);
+                        }
+                    } else {
+                        r.setGenomePosition(0);
+                    }
+                }
+
+                if (!r.isFrozen()) {
+                    r.moveOneStep(layeredPane);
+                }
+
+                r.repaint();
             }
-        };
+        });
 
-        timer.scheduleAtFixedRate(updateTask, 0, 16); // ~60 FPS
-    }
-
-    public void stop() {
-        if (timer != null) {
-            timer.cancel();
-        }
+        timer.start();
     }
 }
 
-//for (int i = 0; i < runners.size(); i++) {
-//        char[] genome = runners.get(i).getGenome();
-//        int x_pos = runners.get(i).getX_pos();
-//        int y_pos = runners.get(i).getY_pos();
-//        char gridPosition = runners.get(i).getGridPositionValue(x_pos, y_pos);
-//
-//        while (runners.get(i).getGridPositionValue((runners.get(i).getX()) + (runners.get(i).seeNextGridPosX), (runners.get(i).getY())) + (runners.get(i).seeNextGridPosY) == '1') {
-//            if (runners.get(i).getVelocity() == "positiveX") {
-//                runners.get(i).movePositiveX();
-//            }
-//            if (runners.get(i).getVelocity() == "positiveY") {
-//                runners.get(i).movePositiveY();
-//            }
-//            if (runners.get(i).getVelocity() == "negativeX") {
-//                runners.get(i).moveNegativeX();
-//            }
-//            if (runners.get(i).getVelocity() == "negativeY") {
-//                runners.get(i).moveNegativeY();
-//            }
-//        }
-//        if (gridPosition == '5') {
-//            int geneIndex = runners.get(i).getGenomeIndex();
-//            char gene = genome[geneIndex];
-//            runners.get(i).makeDecision(gene);
-//            while (runners.get(i).getGridPositionValue((runners.get(i).getX()) + (runners.get(i).seeNextGridPosX), (runners.get(i).getY())) + (runners.get(i).seeNextGridPosY) == '0') {
-//                gene = genome[geneIndex + 1];
-//                runners.get(i).makeDecision(gene);
-//                geneIndex += 1;
-//
-//            }
-//            geneIndex += 1;
