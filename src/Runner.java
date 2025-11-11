@@ -113,57 +113,6 @@ public class Runner extends JPanel {
         return positionMap[tileY][tileX]; // Note: row-major order [y][x]
     }
 
-
-
-   /* public void makeDecision(char gene, JLayeredPane layeredPane) {
-        if (velocity.equals("positiveX")) {
-            if (gene == 'R') {
-                moveNegativeY(layeredPane);
-                seeNextGridPosX = 0;
-            } else if (gene == 'L') {
-                movePositiveY(layeredPane);
-                seeNextGridPosX = 0;
-            } else if (gene == 'F') {
-                movePositiveX(layeredPane);
-                seeNextGridPosY = 0;
-            }
-
-        } else if (velocity.equals("positiveY")) {
-            if (gene == 'R') {
-                movePositiveX(layeredPane);
-                seeNextGridPosY = 0;
-            } else if (gene == 'L') {
-                moveNegativeY(layeredPane);
-                seeNextGridPosX = 0;
-            } else if (gene == 'F') {
-                movePositiveY(layeredPane);
-                seeNextGridPosX = 0;
-            }
-        } else if (velocity.equals("negativeX")) {
-            if (gene == 'R') {
-                movePositiveY(layeredPane);
-                seeNextGridPosX = 0;
-            } else if (gene == 'L') {
-                moveNegativeY(layeredPane);
-                seeNextGridPosX = 0;
-            } else if (gene == 'F') {
-                moveNegativeX(layeredPane);
-                seeNextGridPosY = 0;
-            }
-        } else if (velocity.equals("negativeY")) {
-            if (gene == 'R') {
-                moveNegativeX(layeredPane);
-                seeNextGridPosY = 0;
-            } else if (gene == 'L') {
-                movePositiveX(layeredPane);
-                seeNextGridPosY = 0;
-            } else if (gene == 'F') {
-                moveNegativeY(layeredPane);
-                seeNextGridPosX = 0;
-            }
-        }
-    }*/
-
     // Decide the next velocity based on the current gene, without moving
     public void decideNextMove(char gene) {
         switch (velocity) {
@@ -261,7 +210,7 @@ public class Runner extends JPanel {
 
         if (nextTile == '0' || nextTile == ' ') return false; // wall or invalid
 
-        // ✅ valid decision → update velocity and position
+        // valid decision → update velocity and position
         lastVelocity = velocity;
         velocity = newVelocity;
         x_pos = nextX;
@@ -271,27 +220,6 @@ public class Runner extends JPanel {
 
         return true;
     }
-
-
-    // --- Helper methods ---
-
-
-  /*  public static char[] createGenome(int length) {
-        char[] genome = new char[length];
-        Random rand = new Random();
-        for (int i = 0; i < length; i++) {
-            int r = rand.nextInt(3);
-            genome[i] = (r == 0) ? 'R' : (r == 1) ? 'L' : 'F';
-        }
-        return genome;
-    }*/
-
-    /*public static Color colorGenerate() {
-        Random random = new Random();
-        return new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
-    }
-
-     */
 
     // --- Getters & Setters ---
     public char[] getGenome() {

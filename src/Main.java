@@ -23,9 +23,7 @@ public class Main extends JPanel {
         layeredPane.add(maze, Integer.valueOf(0));
         ArrayList<Runner> gen1 = spawn(maze, frame, layeredPane, spawnCount);
         Mazetimer mazetimer = new Mazetimer();
-        mazetimer.start(gen1,spawnCount,layeredPane);
-
-
+        mazetimer.start(gen1, spawnCount, layeredPane);
 
         frame.pack();
         frame.setLocationRelativeTo(null);
@@ -37,49 +35,6 @@ public class Main extends JPanel {
             }
             System.out.println(); // new line after each row
         }
-
-        //This section of code is for demo
-        //System.out.println(Runner.createGenome(10));
-
-/*
-        ArrayList<Evolution> gen2 = spawn(100);
-
-        for(int i=0; i<100; i++){                                 // for loop to create gen 2
-            gen2.add(reproduction(gen1,100));
-        }
-        for(int j=0;j<100;j++){
-            System.out.println("Runner"+j+ "     Genome: "+ Arrays.toString(Evolution.gen2.genome)+ "     Color: " + Evolution.gen2.uniqueColor);
-        }
-*/
-        int tileSize = 34;
-        int x_pix = tileSize / 2;
-        int y_pix = tileSize / 2;
-
-        //temp comment out
-
-  /*      Timer movementTimer = new Timer();
-        movementTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                char[][] grid = maze.getGrid();
-                int tileSize = 34;
-                for (Runner r : gen1) {
-                    int tileX = r.getX() / tileSize;
-                    int tileY = r.getY() / tileSize;
-                    if (tileY >= 0 && tileY < grid.length && tileX >= 0 && tileX < grid[0].length) {
-                        char tile = grid[tileY][tileX]; // get the character at this position
-                        if (tile == '5') {
-                            if (!r.isPausedForGenome()) {
-                                r.pauseForGenome();  //  pause generic movement
-                                r.moveByGenome(grid); //  activate genome once
-                            }
-                        } else {
-                            r.setX(r.getX() + 17); //  generic movement
-                        }
-                    }
-                }
-            }
-        }, 0, 1000);*/
     }
 
     public static ArrayList<Runner> spawn(Maze maze, JFrame frame, JLayeredPane pane, int spawnCount) {  //spawns runners
@@ -96,10 +51,7 @@ public class Main extends JPanel {
             runner.setX(x_pix);
             runner.setY(y_pix);
 
-
             pane.add(runner, Integer.valueOf(i));
-
-
 
             System.out.println("Runner" + i + "     Genome: " + Arrays.toString(runner.genome) + "     Color: " + runner.uniqueColor);
         }
@@ -168,7 +120,6 @@ public class Main extends JPanel {
         }
 
         return parents;
-  
 
     }
 
@@ -201,19 +152,10 @@ public class Main extends JPanel {
                 }
             }
         return genome;
-  /*  }
-    While(runner position == '5'){
-        for(int i=0; i<= genome.length;i++){
-            if(runner position == '1'){
-                break;
-            }
-        }
     }
-
-
     // Create Spawning Children Loop Method
 
-    public int evaluateFitness(List<Point> path, char[][] map) {
+    public int evaluateFitness(java.util.List<Point> path, char[][] map) {
         int fitness = 0;
         boolean reachedGoal = false;
 
@@ -232,81 +174,17 @@ public class Main extends JPanel {
                     reachedGoal = true;
                     break;
                 case '3': // dead end (represented as -1 in char map)
-                    fitness -= 50;
+                    fitness -= 500;
                     break;
             }
         }
-
+/*
         // Bonus for reaching the goal early
         if (reachedGoal) {
             fitness += 50 - path.size(); // shorter paths are better
         }
-
+*/
+        System.out.println(fitness);
         return fitness;
- */
-   /* }
-    private Timer timer;
-    int geneIndex = 0;
-
-    public void start(ArrayList<Runner> runners, int spawncount, JLayeredPane layeredPane ) {
-        timer = new Timer();
-
-        TimerTask updateTask = new TimerTask() {
-            @Override
-            public void run() {
-                for (int i = 0; i < spawncount; i++) {
-                    int x = runners.get(i).getX_pos();
-                    int y = runners.get(i).getY_pos();
-                    //char gridPosition = runners.get(i).getGridPositionValue(x, y);
-
-                    char[] genome = runners.get(i).getGenome();
-
-                    while (runners.get(i).getGridPositionValue(x+runners.get(i).seeNextGridPosX,y+runners.get(i).seeNextGridPosY) == '1') {
-                        if (runners.get(i).getVelocity() == "positiveX") {
-                            runners.get(i).movePositiveX(layeredPane);
-
-                            if (runners.get(i).getVelocity() == "positiveY") {
-                                runners.get(i).movePositiveY(layeredPane);
-                            }
-                            if (runners.get(i).getVelocity() == "negativeX") {
-                                runners.get(i).moveNegativeX(layeredPane);
-                            }
-                            if (runners.get(i).getVelocity() == "negativeY") {
-                                runners.get(i).moveNegativeY(layeredPane);
-                            }
-                        }
-                    }
-                    if (runners.get(i).getGridPositionValue(x, y) == '5') {
-                        char gene = genome[geneIndex];
-                        runners.get(i).makeDecision(gene,layeredPane);
-                        while(runners.get(i).getGridPositionValue(x+runners.get(i).seeNextGridPosX,y+runners.get(i).seeNextGridPosY) == '0'){
-                            geneIndex+=1;
-                            gene = genome[geneIndex];
-                            runners.get(i).makeDecision(gene,layeredPane);
-
-                        }
-
-                    }
-                    geneIndex += 1;
-                    runners.get(i).setGenomePosition(geneIndex);
-
-                    // Ensure visual update
-                }
-
-            }
-
-
-        };
-        timer.scheduleAtFixedRate(updateTask, 0, 16); // ~60 FPS
     }
-
-    public void stop() {
-        if (timer != null) {
-            timer.cancel();
-        }
-    } */
 }
-}
-
-
-

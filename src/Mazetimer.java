@@ -14,7 +14,7 @@ public class Mazetimer {
                 int y = r.getY_pos();
                 char currentTile = r.getGridPositionValue(x, y);
 
-                // 1️⃣ If we hit a decision tile and not frozen, freeze and start thinking
+                // if we hit a decision tile and not frozen, freeze and start thinking
                 if (r.getGridPositionValue(r.getX_pos(), r.getY_pos()) == '5') {
                     if (!r.isFrozen()) {
                         r.setFrozen(true);
