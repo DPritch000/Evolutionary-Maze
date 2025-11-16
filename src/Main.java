@@ -52,6 +52,7 @@ public class Main extends JPanel {
         layeredPane.add(maze, Integer.valueOf(0));
 
 
+
         startButton.addActionListener(e ->{
         try{
             int spawnCount =  Integer.parseInt(spawnCountField.getText());
@@ -60,7 +61,6 @@ public class Main extends JPanel {
             ArrayList<Runner> gen1 = spawn(maze, frame, layeredPane, spawnCount);
             Mazetimer mazetimer = new Mazetimer();
             mazetimer.start(gen1,spawnCount,layeredPane);
-
         }
         catch (NumberFormatException ex){
             System.out.println("Error: Please enter an integer Value");
@@ -81,6 +81,12 @@ public class Main extends JPanel {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
+        for (int i = 0; i < maze.getGrid().length; i++) {
+            for (int j = 0; j < maze.getGrid()[i].length; j++) {
+                System.out.print(maze.getGrid()[i][j] + " ");
+            }
+            System.out.println(); // new line after each row
+        }
     }
 
     public static ArrayList<Runner> spawn(Maze maze, JFrame frame, JLayeredPane pane, int spawnCount) {  //spawns runners
@@ -97,10 +103,7 @@ public class Main extends JPanel {
             runner.setX(x_pix);
             runner.setY(y_pix);
 
-
             pane.add(runner, Integer.valueOf(i));
-
-
 
             System.out.println("Runner" + i + "     Genome: " + Arrays.toString(runner.genome) + "     Color: " + runner.uniqueColor);
         }
@@ -169,7 +172,6 @@ public class Main extends JPanel {
         }
 
         return parents;
-  
 
     }
 
@@ -202,19 +204,10 @@ public class Main extends JPanel {
                 }
             }
         return genome;
-  /*  }
-    While(runner position == '5'){
-        for(int i=0; i<= genome.length;i++){
-            if(runner position == '1'){
-                break;
-            }
-        }
     }
-
-
     // Create Spawning Children Loop Method
 
-    public int evaluateFitness(List<Point> path, char[][] map) {
+    public int evaluateFitness(java.util.List<Point> path, char[][] map) {
         int fitness = 0;
         boolean reachedGoal = false;
 
@@ -233,81 +226,17 @@ public class Main extends JPanel {
                     reachedGoal = true;
                     break;
                 case '3': // dead end (represented as -1 in char map)
-                    fitness -= 50;
+                    fitness -= 500;
                     break;
             }
         }
-
+/*
         // Bonus for reaching the goal early
         if (reachedGoal) {
             fitness += 50 - path.size(); // shorter paths are better
         }
-
+*/
+        System.out.println(fitness);
         return fitness;
- */
-   /* }
-    private Timer timer;
-    int geneIndex = 0;
-
-    public void start(ArrayList<Runner> runners, int spawncount, JLayeredPane layeredPane ) {
-        timer = new Timer();
-
-        TimerTask updateTask = new TimerTask() {
-            @Override
-            public void run() {
-                for (int i = 0; i < spawncount; i++) {
-                    int x = runners.get(i).getX_pos();
-                    int y = runners.get(i).getY_pos();
-                    //char gridPosition = runners.get(i).getGridPositionValue(x, y);
-
-                    char[] genome = runners.get(i).getGenome();
-
-                    while (runners.get(i).getGridPositionValue(x+runners.get(i).seeNextGridPosX,y+runners.get(i).seeNextGridPosY) == '1') {
-                        if (runners.get(i).getVelocity() == "positiveX") {
-                            runners.get(i).movePositiveX(layeredPane);
-
-                            if (runners.get(i).getVelocity() == "positiveY") {
-                                runners.get(i).movePositiveY(layeredPane);
-                            }
-                            if (runners.get(i).getVelocity() == "negativeX") {
-                                runners.get(i).moveNegativeX(layeredPane);
-                            }
-                            if (runners.get(i).getVelocity() == "negativeY") {
-                                runners.get(i).moveNegativeY(layeredPane);
-                            }
-                        }
-                    }
-                    if (runners.get(i).getGridPositionValue(x, y) == '5') {
-                        char gene = genome[geneIndex];
-                        runners.get(i).makeDecision(gene,layeredPane);
-                        while(runners.get(i).getGridPositionValue(x+runners.get(i).seeNextGridPosX,y+runners.get(i).seeNextGridPosY) == '0'){
-                            geneIndex+=1;
-                            gene = genome[geneIndex];
-                            runners.get(i).makeDecision(gene,layeredPane);
-
-                        }
-
-                    }
-                    geneIndex += 1;
-                    runners.get(i).setGenomePosition(geneIndex);
-
-                    // Ensure visual update
-                }
-
-            }
-
-
-        };
-        timer.scheduleAtFixedRate(updateTask, 0, 16); // ~60 FPS
     }
-
-    public void stop() {
-        if (timer != null) {
-            timer.cancel();
-        }
-    } */
 }
-}
-
-
-

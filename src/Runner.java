@@ -113,11 +113,7 @@ public class Runner extends JPanel {
         return positionMap[tileY][tileX]; // Note: row-major order [y][x]
     }
 
-    // --Fitness Function--
-    public int getFitness(){
-        return 0;
-    }
-
+    // Decide the next velocity based on the current gene, without moving
     public void decideNextMove(char gene) {
         switch (velocity) {
             case "positiveX" -> {
