@@ -115,7 +115,7 @@ public class Runner extends JPanel {
 
     // --Fitness Function--
     public int getFitness(){
-        
+        return 0;
     }
 
     public void decideNextMove(char gene) {
