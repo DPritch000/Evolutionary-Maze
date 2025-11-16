@@ -8,22 +8,72 @@ import java.util.*;
 public class Main extends JPanel {
     public static void main(String[] args) {
 
-        //JFame and visuals will go
+        //JFame and visuals will go here
         JFrame frame = new JFrame("Maze Viewer");
+
+        //For Text Fields
+        JTextField spawnCountField;
+        JTextField generationCountField;
+        JTextField simulationSpeed;
+        JButton startButton;
+
         frame.setResizable(true);
-
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
         JLayeredPane layeredPane = new JLayeredPane();
         frame.add(layeredPane);
         layeredPane.setPreferredSize(new Dimension(1920, 1080));
 
-        int spawnCount = 100;
+        //Add Labels and Fields
+        JLabel spawnCountLabel = new JLabel("SpawnCount:");
+        spawnCountLabel.setBounds(34*34+250,10,100,50);
+        spawnCountField = new JTextField();
+        spawnCountField.setBounds(34*34+250,30,100,50);
+        JLabel generationCountLabel = new JLabel("Generations:");
+        generationCountLabel.setBackground(Color.white);
+        generationCountLabel.setForeground(Color.black);
+        generationCountLabel.setBounds(34*34+250,80,100,50);
+        generationCountField = new JTextField();
+        generationCountField.setBounds(34*34+250,100,100,50);
+        startButton = new JButton("Start");
+        startButton.setBounds(34*34+250,200,100,30);
+
+        //JLabel simulationSpeedLabel = new JLabel("Simulation Speed (fps)");
+        layeredPane.setLayout(null);
+        layeredPane.add(spawnCountLabel,1);
+        layeredPane.add(spawnCountField,1);
+        layeredPane.add(generationCountField,1);
+        layeredPane.add(generationCountLabel,1);
+        layeredPane.add(startButton,1);
+
+
+
+
         Maze maze = new Maze();
         layeredPane.add(maze, Integer.valueOf(0));
-        ArrayList<Runner> gen1 = spawn(maze, frame, layeredPane, spawnCount);
-        Mazetimer mazetimer = new Mazetimer();
-        mazetimer.start(gen1,spawnCount,layeredPane);
+
+
+        startButton.addActionListener(e ->{
+        try{
+            int spawnCount =  Integer.parseInt(spawnCountField.getText());
+            int generations = Integer.parseInt(generationCountField.getText());
+
+            ArrayList<Runner> gen1 = spawn(maze, frame, layeredPane, spawnCount);
+            Mazetimer mazetimer = new Mazetimer();
+            mazetimer.start(gen1,spawnCount,layeredPane);
+
+        }
+        catch (NumberFormatException ex){
+            System.out.println("Error: Please enter an integer Value");
+            JOptionPane.showMessageDialog(
+                    null,                       // can also use your JFrame instead of null
+                    "Please enter a valid number!",
+                    "Invalid Input",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+        });
+
+
 
 
 
@@ -31,55 +81,6 @@ public class Main extends JPanel {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        for (int i = 0; i < maze.getGrid().length; i++) {
-            for (int j = 0; j < maze.getGrid()[i].length; j++) {
-                System.out.print(maze.getGrid()[i][j] + " ");
-            }
-            System.out.println(); // new line after each row
-        }
-
-        //This section of code is for demo
-        //System.out.println(Runner.createGenome(10));
-
-/*
-        ArrayList<Evolution> gen2 = spawn(100);
-
-        for(int i=0; i<100; i++){                                 // for loop to create gen 2
-            gen2.add(reproduction(gen1,100));
-        }
-        for(int j=0;j<100;j++){
-            System.out.println("Runner"+j+ "     Genome: "+ Arrays.toString(Evolution.gen2.genome)+ "     Color: " + Evolution.gen2.uniqueColor);
-        }
-*/
-        int tileSize = 34;
-        int x_pix = tileSize / 2;
-        int y_pix = tileSize / 2;
-
-        //temp comment out
-
-  /*      Timer movementTimer = new Timer();
-        movementTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                char[][] grid = maze.getGrid();
-                int tileSize = 34;
-                for (Runner r : gen1) {
-                    int tileX = r.getX() / tileSize;
-                    int tileY = r.getY() / tileSize;
-                    if (tileY >= 0 && tileY < grid.length && tileX >= 0 && tileX < grid[0].length) {
-                        char tile = grid[tileY][tileX]; // get the character at this position
-                        if (tile == '5') {
-                            if (!r.isPausedForGenome()) {
-                                r.pauseForGenome();  //  pause generic movement
-                                r.moveByGenome(grid); //  activate genome once
-                            }
-                        } else {
-                            r.setX(r.getX() + 17); //  generic movement
-                        }
-                    }
-                }
-            }
-        }, 0, 1000);*/
     }
 
     public static ArrayList<Runner> spawn(Maze maze, JFrame frame, JLayeredPane pane, int spawnCount) {  //spawns runners
