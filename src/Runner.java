@@ -1,5 +1,7 @@
 import java.awt.*;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import javax.swing.*;
 
 public class Runner extends JPanel {
@@ -30,6 +32,10 @@ public class Runner extends JPanel {
     private boolean frozen = false;
     private int genomePosition = 0;
     private String lastVelocity = "";
+    Set<String> visitedTiles = new HashSet<>();
+    boolean deadEnd = false;
+    boolean reachedGoal = false;
+    int pathSize = 0;
 
 
     public static Color colorGenerate() {
@@ -281,29 +287,43 @@ public class Runner extends JPanel {
                 (lastVelocity.equals("positiveY") && newDir.equals("negativeY")) ||
                 (lastVelocity.equals("negativeY") && newDir.equals("positiveY"));
     }
-/*
-    public int evaluateFitness() {
-        int fitness = 0;
-        boolean reachedGoal = false;
 
-        for (char tile : pathTiles) {
-            if (tile == '1') { // path
-                fitness += 1;
-            } else if (tile == '2') { // finish
-                fitness += 1000;
-                reachedGoal = true;
-            } else if (tile == '3') { // dead end
-                fitness -= 500;
+    public int fitnessFunction(char tile) {
+
+        if (tile == '1') { // path
+            fitness += 1;
+            pathSize += 1;
+        } else if (tile == '2') { // finish
+            fitness += 1000;
+            reachedGoal = true;
+        } else if (tile == '3') { // dead end
+            fitness -= 500;
+            deadEnd = true;
+        }
+
+            // Bonus for reaching the goal early
+            if (reachedGoal == true) {
+                fitness += 50 - pathSize; // shorter paths are better
             }
+
+            System.out.println(fitness);
+            return fitness;
         }
 
-        // Bonus for reaching the goal early
-        if (reachedGoal) {
-            fitness += 50 - path.size(); // shorter paths are better
-        }
 
-        System.out.println(fitness);
-        return fitness;
+
+    public void evaluateFitness(int x_pos, int y_pos) {
+        int tileX = x_pos / 34;
+        int tileY = y_pos / 34;
+
+        String key = tileX + "," + tileY;
+
+        // add() returns true ONLY if the tile was NOT already visited
+        if (visitedTiles.add(key)) {
+            // first time visiting this tile
+            char tileValue = getGridPositionValue(x_pos, y_pos);
+            fitnessFunction(tileValue);
+        }
     }
-*/
 }
+

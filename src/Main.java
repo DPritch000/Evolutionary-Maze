@@ -58,10 +58,25 @@ public class Main extends JPanel {
             int spawnCount =  Integer.parseInt(spawnCountField.getText());
             int generations = Integer.parseInt(generationCountField.getText());
 
+
+
             ArrayList<Runner> gen1 = spawn(maze, frame, layeredPane, spawnCount);
             Mazetimer mazetimer = new Mazetimer();
             mazetimer.start(gen1,spawnCount,layeredPane);
-        }
+            int i = 0;
+
+                while(i<generations && mazetimer.runComplete){
+                    mazetimer.runComplete = false;
+                    ArrayList<Runner> nextGen = reproduction(gen1, spawnCount);
+                    String genTitle = ("Generation: "+ i+2);
+                    mazetimer.start(nextGen,spawnCount,layeredPane);
+                     if (mazetimer.runComplete) {
+                         i++;
+                     }
+                }
+
+            }
+
         catch (NumberFormatException ex){
             System.out.println("Error: Please enter an integer Value");
             JOptionPane.showMessageDialog(
@@ -102,6 +117,7 @@ public class Main extends JPanel {
 
             runner.setX(x_pix);
             runner.setY(y_pix);
+
 
             pane.add(runner, Integer.valueOf(i));
 
