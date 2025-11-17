@@ -1,8 +1,5 @@
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 import javax.swing.*;
 
 public class Runner extends JPanel {
@@ -284,4 +281,29 @@ public class Runner extends JPanel {
                 (lastVelocity.equals("positiveY") && newDir.equals("negativeY")) ||
                 (lastVelocity.equals("negativeY") && newDir.equals("positiveY"));
     }
+/*
+    public int evaluateFitness() {
+        int fitness = 0;
+        boolean reachedGoal = false;
+
+        for (char tile : pathTiles) {
+            if (tile == '1') { // path
+                fitness += 1;
+            } else if (tile == '2') { // finish
+                fitness += 1000;
+                reachedGoal = true;
+            } else if (tile == '3') { // dead end
+                fitness -= 500;
+            }
+        }
+
+        // Bonus for reaching the goal early
+        if (reachedGoal) {
+            fitness += 50 - path.size(); // shorter paths are better
+        }
+
+        System.out.println(fitness);
+        return fitness;
+    }
+*/
 }

@@ -206,37 +206,14 @@ public class Main extends JPanel {
         return genome;
     }
     // Create Spawning Children Loop Method
-
-    public int evaluateFitness(java.util.List<Point> path, char[][] map) {
-        int fitness = 0;
-        boolean reachedGoal = false;
-
-        for (Point p : path) {
-            int x = p.x;
-            int y = p.y;
-
-            char tile = map[y][x];
-
-            switch (tile) {
-                case '1': // path
-                    fitness += 1;
-                    break;
-                case '2': // finish
-                    fitness += 1000; // big reward for reaching goal
-                    reachedGoal = true;
-                    break;
-                case '3': // dead end (represented as -1 in char map)
-                    fitness -= 500;
-                    break;
-            }
-        }
 /*
-        // Bonus for reaching the goal early
-        if (reachedGoal) {
-            fitness += 50 - path.size(); // shorter paths are better
+    public static double totalFitness(ArrayList<Runner> runners) {
+        double sum = 0.0;
+
+        for (Runner r : runners) {
+            sum += r.evaluateFitness();
         }
-*/
-        System.out.println(fitness);
-        return fitness;
+        return sum;
     }
+*/
 }
