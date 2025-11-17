@@ -10,6 +10,10 @@ public class Runner extends JPanel {
         setOpaque(false);
     }
 
+    public boolean printedFinalTime = false;
+
+    public double finalTime = -1;
+
     char right = 'R';
     char left = 'L';
     Color uniqueColor = colorGenerate();
@@ -163,6 +167,7 @@ public class Runner extends JPanel {
             case "negativeX" -> moveNegativeX(pane);
             case "negativeY" -> moveNegativeY(pane);
         }
+        evaluateFitness(x_pos, y_pos);
     }
 
     // --- Genome & Decisions ---
@@ -290,6 +295,8 @@ public class Runner extends JPanel {
 
     public int fitnessFunction(char tile) {
 
+        int fitness = 0;
+
         if (tile == '1') { // path
             fitness += 1;
             pathSize += 1;
@@ -305,12 +312,8 @@ public class Runner extends JPanel {
             if (reachedGoal == true) {
                 fitness += 50 - pathSize; // shorter paths are better
             }
-
-            System.out.println(fitness);
-            return fitness;
-        }
-
-
+        return fitness;
+    }
 
     public void evaluateFitness(int x_pos, int y_pos) {
         int tileX = x_pos / 34;

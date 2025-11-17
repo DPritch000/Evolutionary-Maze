@@ -1,7 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.ArrayList;
 import java.util.*;
 
@@ -118,10 +116,11 @@ public class Main extends JPanel {
             runner.setX(x_pix);
             runner.setY(y_pix);
 
+            runner.evaluateFitness(x_pix, y_pix);
 
             pane.add(runner, Integer.valueOf(i));
 
-            System.out.println("Runner" + i + "     Genome: " + Arrays.toString(runner.genome) + "     Color: " + runner.uniqueColor);
+            System.out.println("Runner" + i + "     Genome: " + Arrays.toString(runner.genome) + "     |     Color: " + runner.uniqueColor);
         }
         return runners;
 
@@ -222,14 +221,16 @@ public class Main extends JPanel {
         return genome;
     }
     // Create Spawning Children Loop Method
-/*
-    public static double totalFitness(ArrayList<Runner> runners) {
-        double sum = 0.0;
+
+    public static int totalFitness(ArrayList<Runner> runners) {
+
+        int sum = 0;
 
         for (Runner r : runners) {
-            sum += r.evaluateFitness();
+           r.evaluateFitness(r.getX_pos(), r.getY_pos());
+           sum +=  r.fitness;
         }
         return sum;
     }
-*/
+
 }

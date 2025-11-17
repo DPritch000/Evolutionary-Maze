@@ -4,24 +4,24 @@ import java.util.ArrayList;
 public class Mazetimer {
     private javax.swing.Timer timer;
     boolean runComplete = false;
+    public long startTime;
 
     public void start(ArrayList<Runner> runners, int spawnCount, JLayeredPane layeredPane) {
         int delay = 100; // one frame every 100 ms (~10 FPS)
-
-        long startTime = System.currentTimeMillis(); //start time
+        startTime = System.currentTimeMillis(); // start time
 
         timer = new javax.swing.Timer(delay, e -> {
             boolean allFinished = true;
-            for (Runner r : runners) {
 
+            for (Runner r : runners) {
                 int x = r.getX_pos();
                 int y = r.getY_pos();
                 char currentTile = r.getGridPositionValue(x, y);
 
-                r.evaluateFitness(x,y);
+                r.evaluateFitness(x, y);
 
-                // if we hit a decision tile and not frozen, freeze and start thinking
-                if (r.getGridPositionValue(r.getX_pos(), r.getY_pos()) == '5') {
+                // If we hit a decision tile and not frozen, freeze and start thinking
+                if (currentTile == '5') {
                     if (!r.isFrozen()) {
                         r.setFrozen(true);
                         r.setDeciding(true);
@@ -35,11 +35,7 @@ public class Mazetimer {
                     if (idx < genome.length) {
                         char gene = genome[idx];
                         boolean valid = r.makeDecision(gene, layeredPane);
-                        if (!valid) {
-                            r.setGenomePosition(idx + 1); // try next gene next frame
-                        } else {
-                            r.setGenomePosition(idx + 1);
-                        }
+                        r.setGenomePosition(idx + 1); // advance regardless
                     } else {
                         r.setGenomePosition(0);
                     }
@@ -50,25 +46,31 @@ public class Mazetimer {
                 }
 
                 r.repaint();
+
                 // Check if this runner has finished
                 if (!r.deadEnd && !r.reachedGoal) {
                     allFinished = false; // at least one runner is still running
                 }
 
-                if(r.deadEnd == true || r.reachedGoal==true){
-
-                    double elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000.0;
-
-                    System.out.println(r.genome +" "+elapsedSeconds);
+                // Print final time once
+                for (int i = 0; i < runners.size(); i++) {
+                    r = runners.get(i);
+                    if ((r.deadEnd || r.reachedGoal) && !r.printedFinalTime) {
+                        double elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000.0;
+                        r.finalTime = elapsedSeconds;
+                        r.printedFinalTime = true;
+                        System.out.println("Runner finished: " + i + " | Time: " + r.finalTime + "s | Fitness: " + r.fitness);
+                    }
                 }
-                if (allFinished){
-                    this.runComplete = true;
-                    ((Timer)e.getSource()).stop();
-                }
+            }
+
+            // Stop timer if all runners are done
+            if (allFinished) {
+                this.runComplete = true;
+                ((Timer) e.getSource()).stop();
             }
         });
 
         timer.start();
     }
 }
-
