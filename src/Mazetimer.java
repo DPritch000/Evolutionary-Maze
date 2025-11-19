@@ -53,16 +53,13 @@ public class Mazetimer {
                 }
 
                 // Print final time once
-                for (int i = 0; i < runners.size(); i++) {
-                    r = runners.get(i);
                     if ((r.deadEnd || r.reachedGoal) && !r.printedFinalTime) {
                         double elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000.0;
                         r.finalTime = elapsedSeconds;
                         r.printedFinalTime = true;
-                        System.out.println("Runner finished: " + i + " | Time: " + r.finalTime + "s | Fitness: " + r.fitness);
+                        System.out.println("Runner " + r.index + " finished: Time: " + r.finalTime + "s | Fitness: " + r.fitness);
                     }
                 }
-            }
 
             // Stop timer if all runners are done
             if (allFinished) {

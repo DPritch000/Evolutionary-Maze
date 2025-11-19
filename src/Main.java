@@ -100,14 +100,15 @@ public class Main extends JPanel {
             }
             System.out.println(); // new line after each row
         }
+        System.out.println();
     }
 
     public static ArrayList<Runner> spawn(Maze maze, JFrame frame, JLayeredPane pane, int spawnCount) {  //spawns runners
         ArrayList<Runner> runners = new ArrayList<>();
         for (int i = 1; i <= spawnCount; i++) {
             Runner runner = new Runner();
+            runner.index = i;
             runners.add(runner);
-
 
             int tileSize = 34;
             int x_pix = tileSize / 2;
@@ -120,7 +121,8 @@ public class Main extends JPanel {
 
             pane.add(runner, Integer.valueOf(i));
 
-            System.out.println("Runner" + i + "     Genome: " + Arrays.toString(runner.genome) + "     |     Color: " + runner.uniqueColor);
+            System.out.println("Runner " + i + ": Genome: " + Arrays.toString(runner.genome) + "     |     Color: " + runner.uniqueColor);
+            System.out.println();
         }
         return runners;
 

@@ -10,6 +10,8 @@ public class Runner extends JPanel {
         setOpaque(false);
     }
 
+    public int index;
+
     public boolean printedFinalTime = false;
 
     public double finalTime = -1;
