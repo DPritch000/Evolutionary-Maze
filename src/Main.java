@@ -1,9 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Random;
 
 public class Main extends JPanel {
+
     public static void main(String[] args) {
 
         //JFame and visuals will go here
@@ -23,216 +25,176 @@ public class Main extends JPanel {
 
         //Add Labels and Fields
         JLabel spawnCountLabel = new JLabel("SpawnCount:");
-        spawnCountLabel.setBounds(34*34+250,10,100,50);
+        spawnCountLabel.setBounds(34 * 34 + 250, 10, 100, 50);
         spawnCountField = new JTextField();
-        spawnCountField.setBounds(34*34+250,30,100,50);
+        spawnCountField.setBounds(34 * 34 + 250, 30, 100, 50);
         JLabel generationCountLabel = new JLabel("Generations:");
         generationCountLabel.setBackground(Color.white);
         generationCountLabel.setForeground(Color.black);
-        generationCountLabel.setBounds(34*34+250,80,100,50);
+        generationCountLabel.setBounds(34 * 34 + 250, 80, 100, 50);
         generationCountField = new JTextField();
-        generationCountField.setBounds(34*34+250,100,100,50);
+        generationCountField.setBounds(34 * 34 + 250, 100, 100, 50);
         startButton = new JButton("Start");
-        startButton.setBounds(34*34+250,200,100,30);
+        startButton.setBounds(34 * 34 + 250, 200, 100, 30);
 
         //JLabel simulationSpeedLabel = new JLabel("Simulation Speed (fps)");
         layeredPane.setLayout(null);
-        layeredPane.add(spawnCountLabel,1);
-        layeredPane.add(spawnCountField,1);
-        layeredPane.add(generationCountField,1);
-        layeredPane.add(generationCountLabel,1);
-        layeredPane.add(startButton,1);
+        layeredPane.add(spawnCountLabel, 1);
+        layeredPane.add(spawnCountField, 1);
+        layeredPane.add(generationCountField, 1);
+        layeredPane.add(generationCountLabel, 1);
+        layeredPane.add(startButton, 1);
 
-
-
-
+        // Maze
         Maze maze = new Maze();
         layeredPane.add(maze, Integer.valueOf(0));
 
-
-
-        startButton.addActionListener(e ->{
-        try{
-            int spawnCount =  Integer.parseInt(spawnCountField.getText());
-            int generations = Integer.parseInt(generationCountField.getText());
-
-
-
-            ArrayList<Runner> gen1 = spawn(maze, frame, layeredPane, spawnCount);
-            Mazetimer mazetimer = new Mazetimer();
-            mazetimer.start(gen1,spawnCount,layeredPane);
-            int i = 0;
-
-                while(i<generations && mazetimer.runComplete){
-                    mazetimer.runComplete = false;
-                    ArrayList<Runner> nextGen = reproduction(gen1, spawnCount);
-                    String genTitle = ("Generation: "+ i+2);
-                    mazetimer.start(nextGen,spawnCount,layeredPane);
-                     if (mazetimer.runComplete) {
-                         i++;
-                     }
-                }
-
-            }
-
-        catch (NumberFormatException ex){
-            System.out.println("Error: Please enter an integer Value");
-            JOptionPane.showMessageDialog(
-                    null,                       // can also use your JFrame instead of null
-                    "Please enter a valid number!",
-                    "Invalid Input",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
-        });
-
-
-
-
-
+        frame.add(layeredPane);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        for (int i = 0; i < maze.getGrid().length; i++) {
-            for (int j = 0; j < maze.getGrid()[i].length; j++) {
-                System.out.print(maze.getGrid()[i][j] + " ");
-            }
-            System.out.println(); // new line after each row
-        }
-        System.out.println();
+        // Start button logic
+        startButton.addActionListener(e -> {
+
+            new Thread(() -> {
+
+                try {
+                    int spawnCount = Integer.parseInt(spawnCountField.getText());
+                    int generations = Integer.parseInt(generationCountField.getText());
+
+                    ArrayList<Runner> currentGen = spawnRunners(spawnCount, layeredPane);
+
+                    // GEN 1
+                    System.out.println("=== GENERATION 1 ===");
+                    Mazetimer timer = new Mazetimer();
+                    timer.start(currentGen);
+
+                    while (!timer.runComplete) {
+                        Thread.sleep(50);
+                    }
+
+                    // GEN 2+
+                    for (int gen = 2; gen <= generations; gen++) {
+
+                        System.out.println("\n=== GENERATION " + gen + " ===");
+
+                        ArrayList<Runner> nextGen =
+                                reproduce(currentGen, spawnCount, layeredPane);
+
+                        Mazetimer t = new Mazetimer();
+                        t.start(nextGen);
+
+                        while (!t.runComplete) {
+                            Thread.sleep(50);
+                        }
+
+                        currentGen = nextGen;
+                    }
+
+                    JOptionPane.showMessageDialog(frame,
+                            "Simulation Complete! " + generations + " generations finished.");
+
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(frame,
+                            "Invalid input. Enter integers only.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+            }).start();
+        });
     }
 
-    public static ArrayList<Runner> spawn(Maze maze, JFrame frame, JLayeredPane pane, int spawnCount) {  //spawns runners
-        ArrayList<Runner> runners = new ArrayList<>();
-        for (int i = 1; i <= spawnCount; i++) {
-            Runner runner = new Runner();
-            runner.index = i;
-            runners.add(runner);
+    // --- SPAWN RUNNERS ---
+    public static ArrayList<Runner> spawnRunners(int count, JLayeredPane pane) {
+
+        ArrayList<Runner> list = new ArrayList<>();
+
+        for (int i = 1; i <= count; i++) {
+
+            Runner r = new Runner();
+            r.index = i;
 
             int tileSize = 34;
             int x_pix = tileSize / 2;
             int y_pix = 17 + (int) ((Math.random() * (20)) - 10);
+            r.setX(x_pix);
+            r.setY(y_pix);
 
-            runner.setX(x_pix);
-            runner.setY(y_pix);
+            pane.add(r, Integer.valueOf(1000 + i));
 
-            runner.evaluateFitness(x_pix, y_pix);
+            System.out.println("Runner " + i + " genome: " + Arrays.toString(r.genome));
 
-            pane.add(runner, Integer.valueOf(i));
-
-            System.out.println("Runner " + i + ": Genome: " + Arrays.toString(runner.genome) + "     |     Color: " + runner.uniqueColor);
-            System.out.println();
+            list.add(r);
         }
-        return runners;
 
+        pane.repaint();
+        return list;
     }
 
-    public static ArrayList<Runner> reproduction(ArrayList<Runner> parents, int spawnCount) {
-        Random rand1 = new Random();
-        int randomNumber1 = rand1.nextInt(spawnCount); //MAKE THIS WEIGHTED BASED ON FITNESS LATER
-        Random rand2 = new Random();
-        int randomNumber2 = rand2.nextInt(spawnCount);
-        Runner parent1 = parents.get(randomNumber1);
-        Runner parent2 = parents.get(randomNumber2);
+    // --- REPRODUCTION ---
+    public static ArrayList<Runner> reproduce(ArrayList<Runner> parents,
+                                              int count, JLayeredPane pane) {
 
-        int length = parent1.genome.length;
-        int crossoverPoint = rand1.nextInt(length);
-
-        Runner child1 = null;
-        Runner child2 = null;
-
-        //For Child1
-// First half from parent1
-        for (int i = 0; i < crossoverPoint; i++) {
-            child1.genome[i] = parent1.genome[i];
-        }
-
-        // Second half from parent2
-        for (int i = crossoverPoint; i < length; i++) {
-            child1.genome[i] = parent2.genome[i];
-        }
-
-        mutate(child1.genome);  // Using the mutation Method
-
-        //Chosing Color
-        Random rand3 = new Random();
-        boolean trueOrFalse = rand3.nextBoolean();
-        if (trueOrFalse == true) {
-            child1.uniqueColor = parent1.uniqueColor;
-        } else if (trueOrFalse == false) {
-            child1.uniqueColor = parent2.uniqueColor;
-        }
-
-        //For Child 2
-
-        for (int i = 0; i < crossoverPoint; i++) {
-            child2.genome[i] = parent2.genome[i];
-        }
-
-        for (int i = crossoverPoint; i < length; i++) {
-            child2.genome[i] = parent1.genome[i];
-        }
-        mutate(child2.genome);
-
-        parents.set(randomNumber1, child1);
-        parents.set(randomNumber2, child2);
-
-        //Choosing Color
-
-        Random rand4 = new Random();
-        boolean trueOrFalse2 = rand4.nextBoolean();
-        if (trueOrFalse2 == true) {
-            child2.uniqueColor = parent1.uniqueColor;
-        } else if (trueOrFalse2 == false) {
-            child2.uniqueColor = parent2.uniqueColor;
-        }
-
-        return parents;
-
-    }
-
-    public static char[] mutate(char[] genome) {  // adds chance of mutation to genome
-        double mutationRate = 0.1;
+        ArrayList<Runner> children = new ArrayList<>();
         Random rand = new Random();
-        for (int i = 0; i <= genome.length; i++)
-            if (rand.nextDouble() < mutationRate) {
-                if (genome[i] == 'R') {
-                    double randomNum1 = Math.floor(Math.random() * 2) + 1;
-                    if (randomNum1 == 1) {
-                        genome[i] = 'L';
-                    } else if (randomNum1 == 2) {
-                        genome[i] = 'F';
-                    }
-                } else if (genome[i] == 'L') {
-                    double randomNum2 = Math.floor(Math.random() * 2) + 1;
-                    if (randomNum2 == 1) {
-                        genome[i] = 'R';
-                    } else if (randomNum2 == 2) {
-                        genome[i] = 'F';
-                    }
-                } else if (genome[i] == 'F') {
-                    double randomNum3 = Math.floor(Math.random() * 2) + 1;
-                    if (randomNum3 == 1) {
-                        genome[i] = 'L';
-                    } else if (randomNum3 == 2) {
-                        genome[i] = 'R';
-                    }
-                }
+
+        parents.sort((a, b) -> Integer.compare(b.fitness, a.fitness));
+
+        for (int i = 0; i < count; i++) {
+            Runner p1 = parents.get(rand.nextInt(Math.min(10, parents.size())));
+            Runner p2 = parents.get(rand.nextInt(Math.min(10, parents.size())));
+
+            if (p2.fitness > p1.fitness) {
+                Runner tmp = p1; p1 = p2; p2 = tmp;
             }
-        return genome;
-    }
-    // Create Spawning Children Loop Method
 
-    public static int totalFitness(ArrayList<Runner> runners) {
+            Runner child = new Runner();
+            child.index = i + 1;
 
-        int sum = 0;
+            // Crossover
+            int cut = rand.nextInt(p1.genome.length);
+            for (int j = 0; j < cut; j++) child.genome[j] = p1.genome[j];
+            for (int j = cut; j < p1.genome.length; j++) child.genome[j] = p2.genome[j];
 
-        for (Runner r : runners) {
-           r.evaluateFitness(r.getX_pos(), r.getY_pos());
-           sum +=  r.fitness;
+            // Mutation
+            mutate(child.genome);
+
+            // Reset state
+            int tileSize = 34;
+            int x_pix = tileSize / 2;
+            int y_pix = 17 + (int) ((Math.random() * (20)) - 10);
+            child.setX(x_pix);
+            child.setY(y_pix);
+            child.fitness = 0;
+            child.deadEnd = false;
+            child.reachedGoal = false;
+            child.printedFinalTime = false;
+            child.finalTime = -1;
+            child.setFrozen(false);
+            child.setDeciding(false);
+            child.setGenomePosition(0);
+
+            pane.add(child, Integer.valueOf(2000 + i));
+            children.add(child);
         }
-        return sum;
+
+        // Remove old runners
+        for (Runner r : parents) pane.remove(r);
+
+        pane.repaint();
+        return children;
     }
 
+    // --- MUTATION ---
+    public static void mutate(char[] genome) {
+        Random rand = new Random();
+        double rate = 0.1;
+
+        for (int i = 0; i < genome.length; i++) {
+            if (rand.nextDouble() < rate) {
+                genome[i] = "RLF".charAt(rand.nextInt(3));
+            }
+        }
+    }
 }

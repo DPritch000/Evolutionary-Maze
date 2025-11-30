@@ -71,8 +71,8 @@ public class Maze extends JPanel{
                     g.setColor(Color.BLUE); // start
                 }else if (tile == '5') {
                     g.setColor(Color.YELLOW); // turn
-                }else if (tile == 0) {
-                    g.setColor(Color.BLACK); // wall
+                }else if (tile == '0') {
+                    g.setColor(Color.GRAY); // wall
                 }
 
                 g.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);

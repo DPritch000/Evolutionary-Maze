@@ -2,69 +2,73 @@ import javax.swing.*;
 import java.util.ArrayList;
 
 public class Mazetimer {
-    private javax.swing.Timer timer;
-    boolean runComplete = false;
-    public long startTime;
 
-    public void start(ArrayList<Runner> runners, int spawnCount, JLayeredPane layeredPane) {
-        int delay = 100; // one frame every 100 ms (~10 FPS)
-        startTime = System.currentTimeMillis(); // start time
+    private Timer timer;
+    public boolean runComplete = false;
+    private long startTime;
 
-        timer = new javax.swing.Timer(delay, e -> {
+    public void start(ArrayList<Runner> runners) {
+
+        runComplete = false;
+        startTime = System.currentTimeMillis();
+
+        int delay = 120; // ~8 FPS (safe for Swing)
+
+        timer = new Timer(delay, e -> {
+
             boolean allFinished = true;
 
             for (Runner r : runners) {
-                int x = r.getX_pos();
-                int y = r.getY_pos();
-                char currentTile = r.getGridPositionValue(x, y);
 
-                r.evaluateFitness(x, y);
-
-                // If we hit a decision tile and not frozen, freeze and start thinking
-                if (currentTile == '5') {
-                    if (!r.isFrozen()) {
-                        r.setFrozen(true);
-                        r.setDeciding(true);
-                    }
-                }
-
+                // If runner is frozen but needs to decide
                 if (r.isFrozen() && r.isDeciding()) {
                     char[] genome = r.getGenome();
                     int idx = r.getGenomePosition();
 
-                    if (idx < genome.length) {
+                    boolean decided = false;
+
+                    int attempts = 0;
+                    while (attempts < genome.length && !decided) {
                         char gene = genome[idx];
-                        boolean valid = r.makeDecision(gene, layeredPane);
-                        r.setGenomePosition(idx + 1); // advance regardless
-                    } else {
-                        r.setGenomePosition(0);
+                        boolean valid = r.makeDecision(gene);
+
+                        idx = (idx + 1) % genome.length; // always advance
+                        attempts++;
+
+                        if (valid) {
+                            r.setFrozen(false);
+                            r.setDeciding(false);
+                            decided = true;
+                        }
                     }
+
+// update genome position even if no valid move was found
+                    r.setGenomePosition(idx);
                 }
 
+                // If not frozen, move
                 if (!r.isFrozen()) {
-                    r.moveOneStep(layeredPane);
+                    r.moveOneStep();
                 }
 
-                r.repaint();
-
-                // Check if this runner has finished
+                // Check if runner is done
                 if (!r.deadEnd && !r.reachedGoal) {
-                    allFinished = false; // at least one runner is still running
+                    allFinished = false;
                 }
 
                 // Print final time once
-                    if ((r.deadEnd || r.reachedGoal) && !r.printedFinalTime) {
-                        double elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000.0;
-                        r.finalTime = elapsedSeconds;
-                        r.printedFinalTime = true;
-                        System.out.println("Runner " + r.index + " finished: Time: " + r.finalTime + "s | Fitness: " + r.fitness);
-                    }
+                if ((r.deadEnd || r.reachedGoal) && !r.printedFinalTime) {
+                    double elapsed = (System.currentTimeMillis() - startTime) / 1000.0;
+                    r.finalTime = elapsed;
+                    r.printedFinalTime = true;
+                    System.out.println("Runner " + r.index +
+                            " finished: Time=" + elapsed + "s | Fitness=" + r.fitness);
                 }
+            }
 
-            // Stop timer if all runners are done
             if (allFinished) {
-                this.runComplete = true;
-                ((Timer) e.getSource()).stop();
+                runComplete = true;
+                timer.stop();
             }
         });
 
