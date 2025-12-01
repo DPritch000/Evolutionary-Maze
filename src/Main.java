@@ -19,39 +19,51 @@ public class Main extends JPanel {
 
         frame.setResizable(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        // ✅ LAYERED PANE (scrollable content)
         JLayeredPane layeredPane = new JLayeredPane();
-        frame.add(layeredPane);
         layeredPane.setPreferredSize(new Dimension(1920, 1080));
+        layeredPane.setLayout(null);
+
+        // ✅ WRAP layeredPane IN A SCROLLPANE
+        JScrollPane scrollPane = new JScrollPane(
+                layeredPane,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        );
+
+        // ✅ Add scrollPane to frame (NOT layeredPane)
+        frame.add(scrollPane);
 
         //Add Labels and Fields
         JLabel spawnCountLabel = new JLabel("SpawnCount:");
         spawnCountLabel.setBounds(34 * 34 + 250, 10, 100, 50);
         spawnCountField = new JTextField();
         spawnCountField.setBounds(34 * 34 + 250, 30, 100, 50);
+
         JLabel generationCountLabel = new JLabel("Generations:");
         generationCountLabel.setBackground(Color.white);
         generationCountLabel.setForeground(Color.black);
         generationCountLabel.setBounds(34 * 34 + 250, 80, 100, 50);
+
         generationCountField = new JTextField();
         generationCountField.setBounds(34 * 34 + 250, 100, 100, 50);
+
         startButton = new JButton("Start");
         startButton.setBounds(34 * 34 + 250, 200, 100, 30);
 
-        //JLabel simulationSpeedLabel = new JLabel("Simulation Speed (fps)");
-        layeredPane.setLayout(null);
         layeredPane.add(spawnCountLabel, 1);
         layeredPane.add(spawnCountField, 1);
         layeredPane.add(generationCountField, 1);
         layeredPane.add(generationCountLabel, 1);
         layeredPane.add(startButton, 1);
 
-
         //Text Area For records
         JTextArea statsArea = new JTextArea();
         statsArea.setEditable(false);
         statsArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
         JScrollPane statsScroll = new JScrollPane(statsArea);
-        statsScroll.setBounds(34 * 34 + 400, 10, 300, 400); // adjust position/size
+        statsScroll.setBounds(34 * 34 + 400, 10, 300, 400);
 
         layeredPane.add(statsScroll, 1);
 
@@ -60,11 +72,9 @@ public class Main extends JPanel {
         layeredPane.add(maze, Integer.valueOf(0));
         Runner.setPositionMap(maze.getGrid());
 
-        frame.add(layeredPane);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-
 
         // Start button logic
         startButton.addActionListener(e -> {
@@ -85,7 +95,6 @@ public class Main extends JPanel {
 
                     while (!timer.runComplete) {
                         Thread.sleep(50);
-
                     }
                     updateStats(currentGen, 1, statsArea, spawnCount);
 
@@ -95,8 +104,7 @@ public class Main extends JPanel {
                         while (!timer.runComplete) {
                             Thread.sleep(50);
                         }
-                        SwingUtilities.invokeAndWait(() -> {
-                        }); // flush EDT
+                        SwingUtilities.invokeAndWait(() -> {});
 
                         System.out.println("\n=== GENERATION " + gen + " ===");
 
@@ -109,10 +117,12 @@ public class Main extends JPanel {
                         while (!t.runComplete) {
                             Thread.sleep(50);
                         }
+
                         int maxFitness = 0;
                         int maxIndex = 0;
                         currentGen = nextGen;
                         updateStats(currentGen, gen, statsArea, spawnCount);
+
                         if (gen == generations) {
                             for (int i = 0; i < spawnCount; i++) {
                                 if (currentGen.get(i).getFitness() >= maxFitness) {
@@ -120,9 +130,9 @@ public class Main extends JPanel {
                                     maxIndex = i;
                                 }
                             }
-                            statsArea.append("Runner with Highest Fitness:\nRunner " + maxIndex + "\nGenome: " + new String(currentGen.get(maxIndex).getGenome()));
+                            statsArea.append("Runner with Highest Fitness:\nRunner " + maxIndex +
+                                    "\nGenome: " + new String(currentGen.get(maxIndex).getGenome()));
                         }
-
                     }
 
                     JOptionPane.showMessageDialog(frame,
@@ -133,7 +143,7 @@ public class Main extends JPanel {
                             "Invalid input. Enter integers only.",
                             "Error", JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
-                    ex.printStackTrace(); // ✅ prints the REAL error in console
+                    ex.printStackTrace();
                     JOptionPane.showMessageDialog(frame,
                             "An unexpected error occurred. Check console for details.",
                             "Error", JOptionPane.ERROR_MESSAGE);
@@ -275,25 +285,29 @@ public class Main extends JPanel {
     }
 
     // Roulette wheel selection helper
+    private static final Random rand = new Random();
+
     private static Runner selectMate(ArrayList<Runner> parents) {
         int totalFitness = 0;
+
         for (Runner r : parents) {
-            totalFitness += r.getFitness();
+            totalFitness += Math.max(0, r.getFitness()); // ensure non-negative
         }
 
-        Random rand = new Random();
-        if (totalFitness <= 0) {
+        if (totalFitness == 0) {
             return parents.get(rand.nextInt(parents.size()));
         }
 
         int randomNum = rand.nextInt(totalFitness);
         int cumulative = 0;
+
         for (Runner r : parents) {
-            cumulative += r.getFitness();
+            cumulative += Math.max(0, r.getFitness());
             if (cumulative > randomNum) {
                 return r;
             }
         }
+
         return parents.get(parents.size() - 1);
     }
 

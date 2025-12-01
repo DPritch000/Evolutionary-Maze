@@ -70,6 +70,9 @@ public class Mazetimer {
                     System.out.println("Runner " + r.index +
                             " finished: Time= " + elapsed + "s | Fitness= " + r.fitness);
                 }
+                if(r.finalTime >= 19.0){
+                    r.fitness -= 100000;
+                }
             }
             if(((System.currentTimeMillis() - startTime)/1000.0) > 20.0){
                 runComplete = true;
