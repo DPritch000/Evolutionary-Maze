@@ -18,7 +18,7 @@ public class Runner extends JPanel {
     private boolean deciding = false;
     private boolean frozen = false;
 
-    public int fitness = 0;
+    public int fitness;
     public int x_pos;
     public int y_pos;
 
@@ -36,8 +36,12 @@ public class Runner extends JPanel {
     private static final char[][] positionMap = maze.getGrid();
 
     public Runner() {
-        setBounds(0, 0, 1920, 1080);
+        setSize(34/4, 34/4);
         setOpaque(false);
+    }
+    public void placeAt(int x, int y) {
+        setX(x); setY(y);
+        setLocation(x, y);
     }
 
     // --- COLOR + GENOME ---
@@ -236,7 +240,7 @@ public class Runner extends JPanel {
 
         // Wall or out of bounds → stop this runner
         if (nextTile == '0') {
-            deadEnd = false;
+
             frozen = true;
             deciding = true;
             return;
@@ -317,9 +321,12 @@ public class Runner extends JPanel {
     public boolean isDeciding() { return deciding; }
     public void setDeciding(boolean d) { deciding = d; }
 
+    public boolean getIfReachedGoal(){return reachedGoal;}
+
     public int getX_pos() { return x_pos; }
     public int getY_pos() { return y_pos; }
     public void setX(int x) { x_pos = x; }
     public void setY(int y) { y_pos = y; }
+    public int getFitness(){ return fitness;}
 }
 

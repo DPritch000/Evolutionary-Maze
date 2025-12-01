@@ -44,6 +44,12 @@ public class Mazetimer {
 
 // update genome position even if no valid move was found
                     r.setGenomePosition(idx);
+                    if (attempts >= genome.length && !decided) {
+                        // No valid moves left → runner is stuck
+                        r.deadEnd = true;
+                        r.setFrozen(true);
+                        r.setDeciding(false);
+                    }
                 }
 
                 // If not frozen, move

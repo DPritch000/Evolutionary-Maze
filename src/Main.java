@@ -45,6 +45,17 @@ public class Main extends JPanel {
         layeredPane.add(generationCountLabel, 1);
         layeredPane.add(startButton, 1);
 
+
+
+        //Text Area For records
+        JTextArea statsArea = new JTextArea();
+        statsArea.setEditable(false);
+        statsArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        JScrollPane statsScroll = new JScrollPane(statsArea);
+        statsScroll.setBounds(34 * 34 + 400, 10, 300, 400); // adjust position/size
+
+        layeredPane.add(statsScroll, 1);
+
         // Maze
         Maze maze = new Maze();
         layeredPane.add(maze, Integer.valueOf(0));
@@ -53,6 +64,8 @@ public class Main extends JPanel {
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+
 
         // Start button logic
         startButton.addActionListener(e -> {
@@ -72,10 +85,18 @@ public class Main extends JPanel {
 
                     while (!timer.runComplete) {
                         Thread.sleep(50);
+
                     }
+                    updateStats(currentGen,1,statsArea,spawnCount);
 
                     // GEN 2+
                     for (int gen = 2; gen <= generations; gen++) {
+
+                        while (!timer.runComplete) {
+                            Thread.sleep(50);
+                        }
+                        SwingUtilities.invokeAndWait(() -> {}); // flush EDT
+
 
                         System.out.println("\n=== GENERATION " + gen + " ===");
 
@@ -88,8 +109,20 @@ public class Main extends JPanel {
                         while (!t.runComplete) {
                             Thread.sleep(50);
                         }
-
+                        int maxFitness = 0;
+                        int maxIndex = 0;
                         currentGen = nextGen;
+                        updateStats(currentGen,gen,statsArea,spawnCount);
+                        if(gen == generations){
+                            for(int i=0; i<spawnCount;i++){
+                                if (currentGen.get(i).getFitness()>=maxFitness) {
+                                    maxFitness = currentGen.get(i).getFitness();
+                                    maxIndex = i;
+                                }
+                            }
+                            statsArea.append("Runner with Highest Fitness:\nRunner "+maxIndex+"\nGenome: "+ new String(currentGen.get(maxIndex).getGenome()));
+                        }
+
                     }
 
                     JOptionPane.showMessageDialog(frame,
@@ -118,9 +151,8 @@ public class Main extends JPanel {
             int tileSize = 34;
             int x_pix = tileSize / 2;
             int y_pix = 17 + (int) ((Math.random() * (20)) - 10);
-            r.setX(x_pix);
-            r.setY(y_pix);
 
+            r.placeAt(x_pix,y_pix);
             pane.add(r, Integer.valueOf(1000 + i));
 
             System.out.println("Runner " + i + " genome: " + Arrays.toString(r.genome));
@@ -175,8 +207,14 @@ public class Main extends JPanel {
             child.setDeciding(false);
             child.setGenomePosition(0);
 
+
+
             pane.add(child, Integer.valueOf(2000 + i));
             children.add(child);
+        }
+
+        for (Runner r : parents) {
+            r.deadEnd = true; // or reachedGoal if appropriate
         }
 
         // Remove old runners
@@ -196,5 +234,23 @@ public class Main extends JPanel {
                 genome[i] = "RLF".charAt(rand.nextInt(3));
             }
         }
+    }
+    public static void updateStats(ArrayList<Runner> generation, int genNumber, JTextArea statsArea, int spawnCount) {
+        int maxFitness = generation.get(0).getFitness();
+        int reachedGoal = 0;
+        for(int i = 0; i < spawnCount; i++){
+            if(generation.get(i).getFitness()>maxFitness) {
+                maxFitness = generation.get(i).getFitness();
+            }
+            if(generation.get(i).getIfReachedGoal()){
+                reachedGoal++;
+            }
+        }
+
+        statsArea.append("=== Generation " + genNumber + " ===\n");
+        statsArea.append("Reached Goal: " + reachedGoal + "/" + generation.size() + "\n");
+        statsArea.append("Highest Fitness: " + maxFitness + "\n");
+
+        statsArea.append("\n");
     }
 }
