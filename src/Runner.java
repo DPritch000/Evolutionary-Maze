@@ -228,19 +228,19 @@ public class Runner extends JPanel {
         char tile = getGridPositionValue(x, y);
 
         if (tile == '1') {
-            fitness += 1;
+            fitness += 5;
             pathSize++;
         }
         else if (tile == '5') {
-            fitness += 1;
+            fitness += 5;
             pathSize++;
         }
         else if (tile == '3') {
-            fitness -= 500;
+            fitness -= 5000;
             deadEnd = true;
         }
         else if (tile == '2') {
-            fitness += 5000;
+            fitness += 500;
             reachedGoal = true;
         }
     }

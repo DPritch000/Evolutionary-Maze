@@ -20,19 +20,16 @@ public class Main extends JPanel {
         frame.setResizable(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        // ✅ LAYERED PANE (scrollable content)
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setPreferredSize(new Dimension(1920, 1080));
         layeredPane.setLayout(null);
 
-        // ✅ WRAP layeredPane IN A SCROLLPANE
         JScrollPane scrollPane = new JScrollPane(
                 layeredPane,
-                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.VERTICAL_SCROLLBAR_NEVER,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         );
 
-        // ✅ Add scrollPane to frame (NOT layeredPane)
         frame.add(scrollPane);
 
         //Add Labels and Fields
@@ -197,8 +194,8 @@ public class Main extends JPanel {
 
         for (int i = 0; i < count; i++) {
             int randomIndex = rand.nextInt(count);
-            Runner p1 = parents.get(getMaxFitnessIndex(parents, count));
-            Runner p2 = selectMate(parents);
+            Runner p1 = selectEliteParent(parents, 50); // top elite runners
+            Runner p2 = parents.get(rand.nextInt(parents.size()));
 
             // Ensure p1 is the fitter one (optional)
             if (p2.fitness > p1.fitness) {
@@ -211,7 +208,7 @@ public class Main extends JPanel {
             child.index = i + 1;
 
             // Crossover
-            int cut = p1.genome.length / 2;
+            int cut = rand.nextInt(p1.genome.length);
             for (int j = 0; j < cut; j++) child.genome[j] = p1.genome[j];
             for (int j = cut; j < p1.genome.length; j++) child.genome[j] = p2.genome[j];
 
@@ -256,7 +253,7 @@ public class Main extends JPanel {
     // --- MUTATION ---
     public static void mutate(char[] genome) {
         Random rand = new Random();
-        double rate = 0.1;
+        double rate = 0.0;
 
         for (int i = 0; i < genome.length; i++) {
             if (rand.nextDouble() < rate) {
@@ -287,28 +284,54 @@ public class Main extends JPanel {
     // Roulette wheel selection helper
     private static final Random rand = new Random();
 
-    private static Runner selectMate(ArrayList<Runner> parents) {
-        int totalFitness = 0;
+    private static Runner selectMate(ArrayList<Runner> parents, int topN) {
+        // Safety: clamp N
+        topN = Math.min(topN, parents.size());
 
+        // Sort by fitness descending
+        ArrayList<Runner> sorted = new ArrayList<>(parents);
+        sorted.sort((a, b) -> Integer.compare(b.getFitness(), a.getFitness()));
+
+        // Extract top N
+        ArrayList<Runner> top = new ArrayList<>(sorted.subList(0, topN));
+
+        // Pick one at random
+        return top.get(rand.nextInt(top.size()));
+    }
+
+    private static final Random rando = new Random();
+
+    private static Runner selectEliteParent(ArrayList<Runner> parents, int topN) {
+        // Clamp N to valid range
+        topN = Math.min(topN, parents.size());
+
+        // Copy + sort by fitness descending
+        ArrayList<Runner> sorted = new ArrayList<>(parents);
+        sorted.sort((a, b) -> Integer.compare(b.getFitness(), a.getFitness()));
+
+        // Extract top N
+        ArrayList<Runner> elite = new ArrayList<>(sorted.subList(0, topN));
+
+        // Randomly pick one elite as p1
+        return elite.get(rando.nextInt(topN));
+    }
+    private static Runner selectHighFitnessParent(ArrayList<Runner> parents, int threshold) {
+        ArrayList<Runner> candidates = new ArrayList<>();
+
+        // Collect all parents above the threshold
         for (Runner r : parents) {
-            totalFitness += Math.max(0, r.getFitness()); // ensure non-negative
-        }
-
-        if (totalFitness == 0) {
-            return parents.get(rand.nextInt(parents.size()));
-        }
-
-        int randomNum = rand.nextInt(totalFitness);
-        int cumulative = 0;
-
-        for (Runner r : parents) {
-            cumulative += Math.max(0, r.getFitness());
-            if (cumulative > randomNum) {
-                return r;
+            if (r.getFitness() > threshold) {
+                candidates.add(r);
             }
         }
 
-        return parents.get(parents.size() - 1);
+        // If none qualify, fall back to full random selection
+        if (candidates.isEmpty()) {
+            return parents.get(rand.nextInt(parents.size()));
+        }
+
+        // Otherwise pick randomly from the qualified group
+        return candidates.get(rand.nextInt(candidates.size()));
     }
 
    private static int getMaxFitnessIndex(ArrayList<Runner> parents, int spawnCount) {
