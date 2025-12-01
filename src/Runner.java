@@ -18,7 +18,7 @@ public class Runner extends JPanel {
     private boolean deciding = false;
     private boolean frozen = false;
 
-    public int fitness;
+    public int fitness = 0;
     public int x_pos;
     public int y_pos;
 
@@ -31,16 +31,21 @@ public class Runner extends JPanel {
     public int pathSize = 0;
     private Set<String> visitedTiles = new HashSet<>();
 
-    // Shared maze reference
-    private static final Maze maze = new Maze();
-    private static final char[][] positionMap = maze.getGrid();
+    // --- Maze grid provided by Main ---
+    private static char[][] positionMap;
+
+    public static void setPositionMap(char[][] map) {
+        positionMap = map;
+    }
 
     public Runner() {
         setSize(34/4, 34/4);
         setOpaque(false);
     }
+
     public void placeAt(int x, int y) {
-        setX(x); setY(y);
+        setX(x);
+        setY(y);
         setLocation(x, y);
     }
 
@@ -75,42 +80,17 @@ public class Runner extends JPanel {
 
         if (tileX < 0 || tileY < 0 ||
                 tileY >= positionMap.length || tileX >= positionMap[0].length) {
-            return '0'; // treat out-of-bounds as wall
+            return '0';
         }
 
         return positionMap[tileY][tileX];
     }
 
-    // --- MOVEMENT (aligned to 34px) ---
-    public void movePositiveX() {
-        velocity = "positiveX";
-        x_pos += 34;
-        setBounds(x_pos, y_pos, 34 / 4, 34 / 4);
-        repaint();
+    public char currentTile() {
+        return getGridPositionValue(x_pos, y_pos);
     }
 
-    public void movePositiveY() {
-        velocity = "positiveY";
-        y_pos += 34;
-        setBounds(x_pos, y_pos, 34 / 4, 34 / 4);
-        repaint();
-    }
-
-    public void moveNegativeX() {
-        velocity = "negativeX";
-        x_pos -= 34;
-        setBounds(x_pos, y_pos, 34 / 4, 34 / 4);
-        repaint();
-    }
-
-    public void moveNegativeY() {
-        velocity = "negativeY";
-        y_pos -= 34;
-        setBounds(x_pos, y_pos, 34 / 4, 34 / 4);
-        repaint();
-    }
-
-    // --- DECISION LOGIC (NO MOVEMENT HERE) ---
+    // --- DECISION LOGIC ---
     private boolean isOpposite(String a, String b) {
         return (a.equals("positiveX") && b.equals("negativeX")) ||
                 (a.equals("negativeX") && b.equals("positiveX")) ||
@@ -127,40 +107,20 @@ public class Runner extends JPanel {
         // Map gene to proposed direction
         switch (velocity) {
             case "positiveX":
-                if (gene == 'R') {
-                    proposed = "positiveY";
-                } else if (gene == 'L') {
-                    proposed = "negativeY";
-                } else if (gene == 'F') {
-                    proposed = "positiveX";
-                }
+                proposed = (gene == 'R') ? "positiveY" :
+                        (gene == 'L') ? "negativeY" : "positiveX";
                 break;
             case "positiveY":
-                if (gene == 'R') {
-                    proposed = "positiveX";
-                } else if (gene == 'L') {
-                    proposed = "negativeX";
-                } else if (gene == 'F') {
-                    proposed = "positiveY";
-                }
+                proposed = (gene == 'R') ? "positiveX" :
+                        (gene == 'L') ? "negativeX" : "positiveY";
                 break;
             case "negativeX":
-                if (gene == 'R') {
-                    proposed = "negativeY";
-                } else if (gene == 'L') {
-                    proposed = "positiveY";
-                } else if (gene == 'F') {
-                    proposed = "negativeX";
-                }
+                proposed = (gene == 'R') ? "negativeY" :
+                        (gene == 'L') ? "positiveY" : "negativeX";
                 break;
             case "negativeY":
-                if (gene == 'R') {
-                    proposed = "negativeX";
-                } else if (gene == 'L') {
-                    proposed = "positiveX";
-                } else if (gene == 'F') {
-                    proposed = "negativeY";
-                }
+                proposed = (gene == 'R') ? "negativeX" :
+                        (gene == 'L') ? "positiveX" : "negativeY";
                 break;
         }
 
@@ -168,49 +128,32 @@ public class Runner extends JPanel {
         int frontX = x_pos;
         int frontY = y_pos;
         switch (velocity) {
-            case "positiveX":
-                frontX += step;
-                break;
-            case "negativeX":
-                frontX -= step;
-                break;
-            case "positiveY":
-                frontY += step;
-                break;
-            case "negativeY":
-                frontY -= step;
-                break;
+            case "positiveX": frontX += step; break;
+            case "negativeX": frontX -= step; break;
+            case "positiveY": frontY += step; break;
+            case "negativeY": frontY -= step; break;
         }
         boolean frontBlocked = (getGridPositionValue(frontX, frontY) == '0');
 
-        // Only forbid reverse if front is open
+        // Forbid reverse only if front is open
         if (!frontBlocked && isOpposite(lastVelocity, proposed)) {
             return false;
         }
 
-        // Compute next step for the proposed direction
+        // Compute next step
         switch (proposed) {
-            case "positiveX":
-                nextX += step;
-                break;
-            case "negativeX":
-                nextX -= step;
-                break;
-            case "positiveY":
-                nextY += step;
-                break;
-            case "negativeY":
-                nextY -= step;
-                break;
+            case "positiveX": nextX += step; break;
+            case "negativeX": nextX -= step; break;
+            case "positiveY": nextY += step; break;
+            case "negativeY": nextY -= step; break;
         }
 
         char nextTile = getGridPositionValue(nextX, nextY);
-        if (nextTile == '0') {
-            return false;
-        }
+        if (nextTile == '0') return false;
 
         lastVelocity = velocity;
         velocity = proposed;
+
         x_pos = nextX;
         y_pos = nextY;
         setBounds(x_pos, y_pos, 34 / 4, 34 / 4);
@@ -218,14 +161,9 @@ public class Runner extends JPanel {
         return true;
     }
 
-    public char currentTile() {
-        return getGridPositionValue(x_pos, y_pos);
-    }
-
     // --- MOVE ONE STEP ---
     public void moveOneStep() {
 
-        // Predict next tile BEFORE moving
         int nextX = x_pos;
         int nextY = y_pos;
 
@@ -238,76 +176,73 @@ public class Runner extends JPanel {
 
         char nextTile = getGridPositionValue(nextX, nextY);
 
-        // Wall or out of bounds → stop this runner
+        // Wall → freeze and decide
         if (nextTile == '0') {
-
             frozen = true;
             deciding = true;
             return;
         }
-        if(currentTile() == '3'){
+
+        // Move
+        x_pos = nextX;
+        y_pos = nextY;
+        setBounds(x_pos, y_pos, 34 / 4, 34 / 4);
+        repaint();
+
+        // Score the tile we just stepped onto
+        evaluateFitness(x_pos, y_pos);
+
+        // Dead end
+        if (currentTile() == '3') {
             deadEnd = true;
             frozen = true;
             deciding = false;
             return;
         }
 
-        // Now actually move
-        x_pos = nextX;
-        y_pos = nextY;
-        setBounds(x_pos, y_pos, 34 / 4, 34 / 4);
-        repaint();
-
-        // Goal check
+        // Goal
         if (currentTile() == '2') {
             reachedGoal = true;
             frozen = true;
             deciding = false;
             return;
         }
-        if(currentTile() == '5'){
-            reachedGoal = false;
+
+        // Turn tile → must decide next
+        if (currentTile() == '5') {
             frozen = true;
             deciding = true;
-            return;
         }
-
-        // Fitness
-        evaluateFitness(x_pos, y_pos);
     }
 
-    // --- FITNESS ---
+    // --- FITNESS (Option B) ---
     public void evaluateFitness(int x, int y) {
         int tileX = x / 34;
         int tileY = y / 34;
 
         String key = tileX + "," + tileY;
 
-        if (visitedTiles.add(key)) {
-            char tile = getGridPositionValue(x, y);
+        // Only score unique tiles
+        if (!visitedTiles.add(key)) return;
 
-            if (tile == '1') {
-                fitness += 1;
-                pathSize++;
-            } else if (tile == '2') {
-                fitness += 1000;
-                reachedGoal = true;
-            } else if (tile == '3') {
-                fitness -= 500;
-                deadEnd = true;
-            }
-            if (reachedGoal) {
-                fitness += (50 - pathSize);
-            }
+        char tile = getGridPositionValue(x, y);
+
+        if (tile == '1') {
+            fitness += 1;
+            pathSize++;
         }
-    }
-
-    // --- HELPERS ---
-    private boolean isReverse(String newDir) {
-        return (lastVelocity.equals("positiveX") && newDir.equals("negativeX")) ||
-                (lastVelocity.equals("negativeX") && newDir.equals("positiveX")) ||
-                (lastVelocity.equals("positiveY") && newDir.equals("negativeY")) ||
-                (lastVelocity.equals("negativeY") && newDir.equals("positiveY"));
+        else if (tile == '5') {
+            fitness += 1;
+            pathSize++;
+        }
+        else if (tile == '3') {
+            fitness -= 500;
+            deadEnd = true;
+        }
+        else if (tile == '2') {
+            fitness += 5000;
+            reachedGoal = true;
+        }
     }
 
     // --- GETTERS / SETTERS ---
@@ -321,12 +256,12 @@ public class Runner extends JPanel {
     public boolean isDeciding() { return deciding; }
     public void setDeciding(boolean d) { deciding = d; }
 
-    public boolean getIfReachedGoal(){return reachedGoal;}
+    public boolean getIfReachedGoal(){ return reachedGoal; }
 
     public int getX_pos() { return x_pos; }
     public int getY_pos() { return y_pos; }
     public void setX(int x) { x_pos = x; }
     public void setY(int y) { y_pos = y; }
-    public int getFitness(){ return fitness;}
-}
 
+    public int getFitness(){ return fitness; }
+}

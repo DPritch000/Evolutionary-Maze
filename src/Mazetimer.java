@@ -68,7 +68,7 @@ public class Mazetimer {
                     r.finalTime = elapsed;
                     r.printedFinalTime = true;
                     System.out.println("Runner " + r.index +
-                            " finished: Time=" + elapsed + "s | Fitness=" + r.fitness);
+                            " finished: Time= " + elapsed + "s | Fitness= " + r.fitness);
                 }
             }
 

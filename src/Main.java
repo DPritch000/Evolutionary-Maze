@@ -46,7 +46,6 @@ public class Main extends JPanel {
         layeredPane.add(startButton, 1);
 
 
-
         //Text Area For records
         JTextArea statsArea = new JTextArea();
         statsArea.setEditable(false);
@@ -59,12 +58,12 @@ public class Main extends JPanel {
         // Maze
         Maze maze = new Maze();
         layeredPane.add(maze, Integer.valueOf(0));
+        Runner.setPositionMap(maze.getGrid());
 
         frame.add(layeredPane);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-
 
 
         // Start button logic
@@ -79,6 +78,7 @@ public class Main extends JPanel {
                     ArrayList<Runner> currentGen = spawnRunners(spawnCount, layeredPane);
 
                     // GEN 1
+                    System.out.println();
                     System.out.println("=== GENERATION 1 ===");
                     Mazetimer timer = new Mazetimer();
                     timer.start(currentGen);
@@ -87,7 +87,7 @@ public class Main extends JPanel {
                         Thread.sleep(50);
 
                     }
-                    updateStats(currentGen,1,statsArea,spawnCount);
+                    updateStats(currentGen, 1, statsArea, spawnCount);
 
                     // GEN 2+
                     for (int gen = 2; gen <= generations; gen++) {
@@ -95,8 +95,8 @@ public class Main extends JPanel {
                         while (!timer.runComplete) {
                             Thread.sleep(50);
                         }
-                        SwingUtilities.invokeAndWait(() -> {}); // flush EDT
-
+                        SwingUtilities.invokeAndWait(() -> {
+                        }); // flush EDT
 
                         System.out.println("\n=== GENERATION " + gen + " ===");
 
@@ -112,15 +112,15 @@ public class Main extends JPanel {
                         int maxFitness = 0;
                         int maxIndex = 0;
                         currentGen = nextGen;
-                        updateStats(currentGen,gen,statsArea,spawnCount);
-                        if(gen == generations){
-                            for(int i=0; i<spawnCount;i++){
-                                if (currentGen.get(i).getFitness()>=maxFitness) {
+                        updateStats(currentGen, gen, statsArea, spawnCount);
+                        if (gen == generations) {
+                            for (int i = 0; i < spawnCount; i++) {
+                                if (currentGen.get(i).getFitness() >= maxFitness) {
                                     maxFitness = currentGen.get(i).getFitness();
                                     maxIndex = i;
                                 }
                             }
-                            statsArea.append("Runner with Highest Fitness:\nRunner "+maxIndex+"\nGenome: "+ new String(currentGen.get(maxIndex).getGenome()));
+                            statsArea.append("Runner with Highest Fitness:\nRunner " + maxIndex + "\nGenome: " + new String(currentGen.get(maxIndex).getGenome()));
                         }
 
                     }
@@ -128,9 +128,14 @@ public class Main extends JPanel {
                     JOptionPane.showMessageDialog(frame,
                             "Simulation Complete! " + generations + " generations finished.");
 
-                } catch (Exception ex) {
+                } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(frame,
                             "Invalid input. Enter integers only.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    ex.printStackTrace(); // ✅ prints the REAL error in console
+                    JOptionPane.showMessageDialog(frame,
+                            "An unexpected error occurred. Check console for details.",
                             "Error", JOptionPane.ERROR_MESSAGE);
                 }
 
@@ -149,10 +154,10 @@ public class Main extends JPanel {
             r.index = i;
 
             int tileSize = 34;
-            int x_pix = tileSize / 2;
-            int y_pix = 17 + (int) ((Math.random() * (20)) - 10);
+            int x_pix = 17;
+            int y_pix = 17;
 
-            r.placeAt(x_pix,y_pix);
+            r.placeAt(x_pix, y_pix);
             pane.add(r, Integer.valueOf(1000 + i));
 
             System.out.println("Runner " + i + " genome: " + Arrays.toString(r.genome));
@@ -171,23 +176,37 @@ public class Main extends JPanel {
         ArrayList<Runner> children = new ArrayList<>();
         Random rand = new Random();
 
-        parents.sort((a, b) -> Integer.compare(b.fitness, a.fitness));
+        // Sort is optional now, since roulette wheel uses raw fitness
+        // parents.sort((a, b) -> Integer.compare(b.fitness, a.fitness));
+
+        // Precompute total fitness
+        double totalFitness = 0;
+        for (Runner r : parents) {
+            totalFitness += r.fitness;
+        }
 
         for (int i = 0; i < count; i++) {
-            Runner p1 = parents.get(rand.nextInt(Math.min(10, parents.size())));
-            Runner p2 = parents.get(rand.nextInt(Math.min(10, parents.size())));
+            int randomIndex = rand.nextInt(count);
+            Runner p1 = parents.get(getMaxFitnessIndex(parents, count));
+            Runner p2 = selectMate(parents);
 
+            // Ensure p1 is the fitter one (optional)
             if (p2.fitness > p1.fitness) {
-                Runner tmp = p1; p1 = p2; p2 = tmp;
+                Runner tmp = p1;
+                p1 = p2;
+                p2 = tmp;
             }
 
             Runner child = new Runner();
             child.index = i + 1;
 
             // Crossover
-            int cut = rand.nextInt(p1.genome.length);
+            int cut = p1.genome.length / 2;
             for (int j = 0; j < cut; j++) child.genome[j] = p1.genome[j];
             for (int j = cut; j < p1.genome.length; j++) child.genome[j] = p2.genome[j];
+
+            // children.add(child);
+
 
             // Mutation
             mutate(child.genome);
@@ -208,7 +227,6 @@ public class Main extends JPanel {
             child.setGenomePosition(0);
 
 
-
             pane.add(child, Integer.valueOf(2000 + i));
             children.add(child);
         }
@@ -222,6 +240,7 @@ public class Main extends JPanel {
 
         pane.repaint();
         return children;
+
     }
 
     // --- MUTATION ---
@@ -235,14 +254,15 @@ public class Main extends JPanel {
             }
         }
     }
+
     public static void updateStats(ArrayList<Runner> generation, int genNumber, JTextArea statsArea, int spawnCount) {
         int maxFitness = generation.get(0).getFitness();
         int reachedGoal = 0;
-        for(int i = 0; i < spawnCount; i++){
-            if(generation.get(i).getFitness()>maxFitness) {
+        for (int i = 0; i < spawnCount; i++) {
+            if (generation.get(i).getFitness() > maxFitness) {
                 maxFitness = generation.get(i).getFitness();
             }
-            if(generation.get(i).getIfReachedGoal()){
+            if (generation.get(i).getIfReachedGoal()) {
                 reachedGoal++;
             }
         }
@@ -252,5 +272,41 @@ public class Main extends JPanel {
         statsArea.append("Highest Fitness: " + maxFitness + "\n");
 
         statsArea.append("\n");
+    }
+
+    // Roulette wheel selection helper
+    private static Runner selectMate(ArrayList<Runner> parents) {
+        int totalFitness = 0;
+        for (Runner r : parents) {
+            totalFitness += r.getFitness();
+        }
+
+        Random rand = new Random();
+        if (totalFitness <= 0) {
+            return parents.get(rand.nextInt(parents.size()));
+        }
+
+        int randomNum = rand.nextInt(totalFitness);
+        int cumulative = 0;
+        for (Runner r : parents) {
+            cumulative += r.getFitness();
+            if (cumulative > randomNum) {
+                return r;
+            }
+        }
+        return parents.get(parents.size() - 1);
+    }
+
+   private static int getMaxFitnessIndex(ArrayList<Runner> parents, int spawnCount) {
+        int index = 0;
+        int maxFitness = parents.get(0).getFitness();;
+        for (int i = 0; i < spawnCount; i++) {
+
+            if (parents.get(i).getFitness() > maxFitness) {
+                maxFitness = parents.get(i).getFitness();
+                index = i;
+            }
+        }
+        return  index;
     }
 }
