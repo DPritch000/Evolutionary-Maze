@@ -253,7 +253,7 @@ public class Main extends JPanel {
     // --- MUTATION ---
     public static void mutate(char[] genome) {
         Random rand = new Random();
-        double rate = 0.0;
+        double rate = 0.1;
 
         for (int i = 0; i < genome.length; i++) {
             if (rand.nextDouble() < rate) {
